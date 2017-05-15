@@ -1,3 +1,10 @@
+# Info
+这是李润东的本科毕业设计 repo：
+* 毕设题目:《基于深度学习的 3D IC 快速可靠性分析研究》
+* title: A Deep Learning Based Method For Fast 3D IC Runtime Reliability Analysis
+* 代码: [deep-stress](https://github.com/CrazyRundong/deep-stress)
+* 模型及数据: Release soon...
+
 # 最新版本：v1.2.7 #
 升级前请阅读下方的更新日志。
 
