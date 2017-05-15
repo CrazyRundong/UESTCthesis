@@ -1,0 +1,48 @@
+% !Mode:: "TeX:UTF-8"
+
+\chapter{Introduction}
+
+Three-Dimensional Integrated Circuits (3D ICs),
+which consists of multiple vertically stacked dies, 
+are emerging as a natural way to overcome interconnect scaling problems in 2D ICs.
+While exploring the benefits such as enabling heterogeneous integration, 
+alleviating interconnect barrier problem, and improving power performance, 
+3D ICs suffers severe thermal induced reliability problems due to its
+stacked structure's poor heat dissipation potential.
+
+Vertically stacked dies in 3D ICs are connected via $Cu$ Though Silicon Vias (TSV)\cite{beyne2008through}. 
+Due to the dramatic variance of 
+\textit{coefficient of thermal expansion} (CTE) and \textit{thermal conductivity}
+of $Cu$ and $SiO_2$ on the metal-silicon connection of TSVs, 
+wafers will encounter with lager thermal stress near each TSV.
+This worsen the runtime reliability of 3D ICs in heavy-load situations.
+
+Dynamic thermal management (DTM) techniques are proposed to address these reliability
+problems. But due to lacking of information on the reliability side, existing DTM 
+methods may only minimize the average temperature of hole chip and reduce temperature
+variance over difference parts on the IC body\cite{zou2013thermomechanical}.
+However, the thermal stress around TSV strongly depends on temperature gradient rather
+than the naive temperature value, only reducing the average temperature may not help with
+the run time reliability \cite{zhang2016fast}.
+
+To accurately simulate the thermal behavior around TSVs, we can apply finite element methods (FEM)
+based models to predict the thermal stress from thermal distribution \cite{lu2009thermo}. 
+However, due to its high computing costs, FEM based models may not be used in runtime scenarios.
+
+Based on artificial neural networks (ANN) and large amount of existing FEM generated data, 
+\cite{zhang2016fast} proposed a fast runtime reliability analysis method to predict the 
+thermal stress near TSVs from their thermal distribution on the
+runtime, which achieved reasonable accuracy under economic computing costs.
+However, this method gets two main drawback: one have to apply hand-crafted feature extraction to
+thermal data, which makes the train-predict process not end-to-end, and the hand-crafted feature used here
+may be complicated and not reliable. Another is, 
+for the lacking of capability of shallow ANN model used in this method, 
+the accuracy is not satisfied enough.
+
+In this work, we propose a modified runtime reliability analysis method.
+Based on deep convolutional neural networks (CNN), the model used in this method can extract features from raw
+thermal data automatically, makes the train-prediction into a end-to-end process.
+While maintaining a economic computing cost, our method achieves more than 2 times accuracy to \cite{zhang2016fast}.
+
+Structure of this work: TODO
+
