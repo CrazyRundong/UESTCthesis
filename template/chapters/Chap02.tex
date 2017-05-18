@@ -1,0 +1,107 @@
+% !Mode:: "TeX:UTF-8"
+
+\chapter{Preliminaries}
+
+In this chapter, we introduce the conceptions of three dimensional integrated circuits, its thermal behavior, 
+basic convolutional neural networks and its optimize methods.
+
+\section{Three Dimensional Integrated Circuits} \label{sec::3DIC}
+
+As integrated circuits technology continuously improves its integration capabilities,
+the limitation of traditional 2D IC becomes more obvious.
+For example, integrated circuits are partitioned into functions blocks (as knows as ``tiles'')
+which are interconnected using routing in parallel 2D planes.
+With the scaling of the technology, these long lines
+have become the speed-limiting factor on the chip, as well as a significant
+source for power consumption. If the functional ``tiles'' on the
+chip could be stacked in three dimensions, the chip area would be
+reduced and much shorter interconnects between would result.
+
+This idea of three dimensional integrated circuits (3D ICs) has been proposed of a long time \cite{Beyne20043D},
+for it gets potential to alleviate some important performance limitations facing CMOS scaling 
+and because it enables so-called heterogeneous integration \cite{Beyne2006Rise}.
+As described in \cite{Beyne20043D}, the 3D stacked devices can be divided into three categories
+by their level of interconnect hierarchy:
+\begin{description}
+    \item[3D-system-in-a-package] (3D-SIP) is the chip level stacking, which means the stacked
+    dies are designed as a series of well-defined and pre-tested sub-blocks, 
+    and the third dimensional connection density is quite low: the available 3D-interconnectivity 
+    between two layers is typically only $2\sim5/mm$ along the perimeter of the device or $4\sim9/mm^2$
+    when area array packages are used.
+    
+    \item[3D-system-on-a-chip] (3D-SoC) connects into a lower level: for systems which need a higher
+    interconnectivity between each dies, 3D-SoC directly connect ``tiles'' in these dies rather than dies
+    itself. These interconnections must behave as on-chip ``global wiring'' interconnects and thus have low
+    resistance and capacitance, allowing for fast interconnects and/or low power interconnectivity.
+    This requires a higher 3D connectivity, in the order of $100/mm^2$.
+    
+    \item[3D-integrated circuit] (3D-IC) is considered as a ``scaling-driven'' technology 
+    which connects transistors themselves. The 3D connections are only local interconnections,
+    The global on-chip interconnect layers on chip remain essentially 2D interconnect layers.
+\end{description}
+
+As reported in \cite{Olmen20083D}, 3D ICs with TSV structures have been successfully demonstrated, 
+in which $Cu$ TSV process is inserted between contact and M1 of their reference $0.13 \mu m$ CMOS process on
+$200mm$ wafers. 
+
+\section{Thermal Behavior of 3D IC}
+
+TSV structure introduced several thermal stress problem which harms the reliability of 3D ICs, due to
+two major reasons:
+\begin{itemize}
+    \item $Cu$ TSV always get a higher thermal conductivity than wafers for their material used.
+    Thus, large temperature gradient may appear in the areas around TSVs, which may
+    introduce large thermal stress.
+    \item A great mismatch of coefficient of thermal expansion (CTE) around TSVs may also enlarge 
+    the thermal stress. The CTE of $SiO_2$ is $4.15\times10^{-6}K^{-1}$, while
+    $17\times10^{-6}K^{-1}$ to $Cu$. This is a four times mismatch.
+    Even though the area around a TSV keep same temperature, $Cu$ TSV expands much more than
+    wafer, which will lead to great stress and harm to IC stability.
+\end{itemize}
+
+Under the Cartesian coordinate, the stress in solid can be formulated as \cite{Chen2013Numerical}:
+\begin{equation} \label{equ::f_xyz}
+\left\{
+    \begin{array}{rl}
+    -f_x &={} k_x - \frac{E\alpha}{1-2\nu}\cdot\frac{\partial T}{\partial x} \\
+    -f_y &={} k_y - \frac{E\alpha}{1-2\nu}\cdot\frac{\partial T}{\partial y} \\
+    -f_z &={} k_z - \frac{E\alpha}{1-2\nu}\cdot\frac{\partial T}{\partial z}
+    \end{array}
+\right.
+\end{equation}
+where
+\begin{equation*}
+\left\{
+    \begin{array}{rl}
+    k_x &= \mu \left( \frac{\partial^2u}{\partial x^2} + \frac{\partial^2u}{\partial y^2} + \frac{\partial^2u}{\partial z^2} \right) 
+          + \left( \mu + \lambda \right) \left( \frac{\partial^2u}{\partial x^2} + \frac{\partial^2u}{\partial y \partial x} + \frac{\partial^2u}{\partial z\partial x} \right) \\
+    k_y &= \mu \left( \frac{\partial^2u}{\partial x^2} + \frac{\partial^2u}{\partial y^2} + \frac{\partial^2u}{\partial z^2} \right) 
+          + \left( \mu + \lambda \right) \left( \frac{\partial^2u}{\partial x \partial y} + \frac{\partial^2u}{\partial x^2} + \frac{\partial^2u}{\partial z\partial y} \right) \\
+    k_z &= \mu \left( \frac{\partial^2u}{\partial x^2} + \frac{\partial^2u}{\partial y^2} + \frac{\partial^2u}{\partial z^2} \right) 
+          + \left( \mu + \lambda \right) \left( \frac{\partial^2u}{\partial x \partial z} + \frac{\partial^2u}{\partial y \partial z} + \frac{\partial^2u}{\partial z^2} \right) \\
+    \mu &= \frac{E}{2(1+\nu)} \\
+    \lambda &= \frac{E\nu}{(1+\nu)(1-2\nu)}
+    \end{array}
+\right.
+\end{equation*}
+and $f_{\left\{ x,y,z \right\}}$ denotes the force in $x$, $y$ and $z$ directions, $E$ the elastic
+modulus, $\nu$ the Poisson ratio, $\alpha$ the thermal expansion, $T$ the temperature, $\mu$ and
+$\lambda$ the Lam\'e coefficients. Note that in practical scenarios, $f_z$ is always $0$ so we may
+pass the evaluation of $f_z$ to accelerate the simulation \cite{Marella2015A}.
+
+\ref{equ::f_xyz} is the theoretic fundamental of finite element method (FEM) to build accurate model for simulating the
+thermal-mechanical stress in a complicated 3D IC structure with TSVs. Given a thermal distribution
+data of a IC layout, we can simulate its related stress information accurately via FEM based models.
+However, this method is quite computational expensive, which make it not practical to apply
+such methods to runtime analysis of 3D IC reliability.
+
+\section{Fully Connected Artificial Neural Networks}
+
+Artificial neural networks (ANNs) or connectionist systems are a computational model used in machine learning, 
+computer science and other research disciplines, which is based on a large collection of connected simple units called artificial neurons, 
+loosely analogous to axons in a biological brain\cite{kohonen1988introduction}.
+Based on 
+
+\section{Convolutional Neural Networks}
+
+\section{Optimize Methods for Neural Networks}
