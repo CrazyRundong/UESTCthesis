@@ -38,7 +38,7 @@ For the TSV structure, they set the values of $r_i$ and $r_o$
 as $20\mu m$ and $24\mu m$, respectively. They also couple
 the solid heat conduction field and the solid mechanical field.
 
-Applying different thermal distribution to above model, they generated $2736$
+Applying different thermal distribution to above model, they generated $N=2736$
 pairs of temperature-stress data that can be used in neural network training.
 The format of their data is like table \ref{tab::t-sformat}
 \footnote{These data in tabular are randomly selected in dataset of \cite{Zhang2016Fast}}.
@@ -65,8 +65,36 @@ extremely thin.
 \end{table}
 
 \subsection{Hand-Crafted Feature Extraction}
+Based on these observations:
+\begin{itemize}
+    \item Reliability of 3D IC with TSV structure strongly depends on 
+          the \textit{maximum} of thermal stress.
+    \item The maximum stress always appears within a certain distance from the TSV center.
+          Large mount of temperature informations are redundance.
+    \item Having a round structure,
+          the TSV and the areas around it have a \textit{rotational symmetry
+          property}: two different thermal/stress maps can be the exactly
+          the same after a certain amount of rotation.
+\end{itemize}
+% TODO: add image for TSV rotation
+\cite{Zhang2016Fast} proposed a feature extraction process: rotate the temperature distribution
+around each TSVs by aligning their maximum temperature line to eliminate the rotation symmetry,
+then interpolate these data points to a continuous true value matrix, finally select temperature
+values uniformly from this interpolated matrix by the Cartesian distance. The procedure can be
+illustrated as figure TODO.
+
+After above precess, the raw text data can be transfered to vectors 
+$\mathbf{x}_{i=1,\cdots,N} \in \mathbb{R}^{320}$, with relevant maximum stress 
+$y_{i=1,\cdots,N} \in \mathbb{R}$,
+we may train the ANN model with these dataset.
 
 \subsection{A Fast Fully-Connected ANN Model}
+The ANN model used in this method uses a simple two layers structure. 
+The input layer gets $55$ neurons, and hidden layer $15$ neurons, finally a $1$ neuron layer
+to output the approximated maximum stress value.
+Training with $2400$ samples randomly selected from whole temperature-stress dataset,
+the model achieves the accuracy of $RMSE: 0.0779$ in the $300$ samples test set 
+which is also selected randomly with no recurrence to training set after $1000$ iterations.
 
 \section{Automatic Feature Extraction via CNN}
 \subsection{A LeNet Based Model}
