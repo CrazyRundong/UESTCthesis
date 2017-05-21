@@ -1,12 +1,32 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter{Preliminaries}
 
+\chapter{Preliminaries}
 In this chapter, we introduce the conceptions of three dimensional integrated circuits, its thermal behavior, 
 basic convolutional neural networks and its optimize methods.
 
-\section{Three Dimensional Integrated Circuits} \label{sec::3DIC}
+In this and following chapters, notations are defined in table \ref{tab::Notaion}.
 
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{c | l}
+        \toprule
+        Notation & Meaning \\
+        \midrule
+        $x$ & a scalar \\
+        $\mathbf{x}$ & a column vector \\
+        $\mathbf{X}$ & a matrix \\
+        $\mathbf{x}_i$ & $i_{th}$ column of matrix $\mathbf{X}$ \\
+        $x_{ij}$ & $j_{th}$ element of $i_{th}$ column in matrix $\mathbf{X}$ \\ 
+        $x_j$ & $j_{th}$ element of column vector $\mathbf{x}$ \\
+        $\left\|\cdot\right\|$ & 2-norm operator \\
+        \bottomrule
+    \end{tabular}
+    \caption{Notions in this work}
+    \label{tab::Notaion}
+\end{table}
+
+\section{Three Dimensional Integrated Circuits} \label{sec::3DIC}
 As integrated circuits technology continuously improves its integration capabilities,
 the limitation of traditional 2D IC becomes more obvious.
 For example, integrated circuits are partitioned into functions blocks (as knows as ``tiles'')
@@ -40,12 +60,13 @@ by their level of interconnect hierarchy:
     The global on-chip interconnect layers on chip remain essentially 2D interconnect layers.
 \end{description}
 
+% TODO: description TSV and relevate image
+
 As reported in \cite{Olmen20083D}, 3D ICs with TSV structures have been successfully demonstrated, 
 in which $Cu$ TSV process is inserted between contact and M1 of their reference $0.13 \mu m$ CMOS process on
 $200mm$ wafers. 
 
-\section{Thermal Behavior of 3D IC}
-
+\section{Thermal Behavior of 3D IC} \label{sec::thermal}
 TSV structure introduced several thermal stress problem which harms the reliability of 3D ICs, due to
 two major reasons:
 \begin{itemize}
@@ -89,18 +110,70 @@ modulus, $\nu$ the Poisson ratio, $\alpha$ the thermal expansion, $T$ the temper
 $\lambda$ the Lam\'e coefficients. Note that in practical scenarios, $f_z$ is always $0$ so we may
 pass the evaluation of $f_z$ to accelerate the simulation \cite{Marella2015A}.
 
-\ref{equ::f_xyz} is the theoretic fundamental of finite element method (FEM) to build accurate model for simulating the
+Equation \ref{equ::f_xyz} is the theoretic fundamental of finite element method (FEM) to build accurate model for simulating the
 thermal-mechanical stress in a complicated 3D IC structure with TSVs. Given a thermal distribution
 data of a IC layout, we can simulate its related stress information accurately via FEM based models.
 However, this method is quite computational expensive, which make it not practical to apply
 such methods to runtime analysis of 3D IC reliability.
 
 \section{Fully Connected Artificial Neural Networks}
-
 Artificial neural networks (ANNs) or connectionist systems are a computational model used in machine learning, 
 computer science and other research disciplines, which is based on a large collection of connected simple units called artificial neurons, 
 loosely analogous to axons in a biological brain\cite{kohonen1988introduction}.
-Based on 
+
+The base element in ANN models is \textit{neuron}, which accepts a set of weighted inputs
+$\sum_{i=1}^{n}(\omega_i\cdot x_i)^{(j)}$, and give an output $y^{(j)}$. 
+Like biological neurons, whether a neuron give a positive output depends on if the
+neuron itself is \textit{activated}. In standard activation scenario, 
+we say a neuron $j$ with a \textit{bias term} $b^{(j)}$ is activated,
+when its linear combination of inputs $f^{(j)}$ gets value larger than its threshold $\theta^{(j)}$.
+Formally,
+\begin{equation}
+\begin{array}{rl}
+y^{(j)}&=\left\{
+        \begin{array}{rl}
+        f^{(j)} ,& \textrm{if $f^{(j)} \ge \theta^{(j)}$} \\
+        0 ,& \textrm{otherwise}
+        \end{array}
+\right. \\
+f^{(j)}&=\sum_{i=1}^{n}(\omega_i\cdot x_i)^{(j)} + b^{(j)}
+\end{array}
+\end{equation}
+
+The standard activate function has lots of drawbacks, such as it's not derivative
+near $f^{(j)} = 0$. A ``soften'' alternative is the \textit{sigmoid} function,
+formally
+\begin{equation}
+\textrm{sigmoid}(x)=\frac{1}{1+\exp^{-x}}
+\end{equation} 
+
+Generally, multiple neurons form a layer, two or more layers form a multi-layer
+neural network. 
+We say neuron $i$ \textit{connect}s to neuron $j$, if the output of neuron $i$ is
+part of the input of neuron $j$.
+If there are $m$ neurons in $j_{th}$ layer, whose outputs are denoted as $\mathbf{y}^{(j)} = y^{(j)}_{1,\cdots,m}$,
+for all $n$ nodes in $j + 1_{th}$ layer, their input is $f^{(j+1)}_{i=1,\cdots,n}={\mathbf{y}^{(j)}}^{\rm T} \cdot \bm{\omega}_i + b_i$,
+we call these two layers are \textit{fully connected}.
+Neurons in a same layer don't connect to each other, but fully connect to its counterparts
+in adjacent layers(so the network called fully-connected ANN). 
+The first layer which accepts input data $x_{1\cdots n}^{(j)}$ is called input layer.
+Correspondingly, the last layer which outputs one or more values $y^{(j)}$ is called output layer.
+Other middle layers are called ``hidden layer(\textit{s})''.
+If one network has no neuron connections from latter layers to preceding layers,
+we call this network a \textit{feedforward network}.
+
+Although the inputs of each neuron is just a simple linear combination of previous
+layers' outputs, the nonlinear activations and layer combinations introduces the
+nonlinearity, which enhances the capability of the ANN model. 
+As reported in \cite{hornik1989multilayer}, universal approximation may be achieved by
+such feedforward ANN with only one hidden layer, as long as the hidden layer has enough neurons.
+
+In summary, fully-connected ANN model can perform a nonlinear map $\mathbb{R}^m \to \mathbb{R}^n$,
+where $m$ is the dimension of input, $n$ the dimension of output. In most situations, raw data
+can not be used as ANN input directly, for raw data always not been well formated, nor normed, 
+dimensional missing, et al.
+The procedure of transforming raw data into well formated and normed inputs $\mathbb{R}^m$ is called
+\textit{feature extraction} or \textit{feature engineering}.
 
 \section{Convolutional Neural Networks}
 

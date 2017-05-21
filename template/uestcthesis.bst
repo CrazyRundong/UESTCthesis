@@ -1994,8 +1994,7 @@ FUNCTION {conference}
   new.block
   format.conference.title output
   new.block
-      booktitle output
-address  output
+      publisher ", " * address * output
       year output
       format.comma.pages output
   new.block
@@ -2006,8 +2005,7 @@ address  output
   new.block
   format.conference.title output
   new.block
-      booktitle output
-address  output
+      publisher ", " * address * output
       year output
       format.comma.pages output
   new.block
