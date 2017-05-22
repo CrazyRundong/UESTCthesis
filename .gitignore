@@ -69,3 +69,6 @@ test
 
 # vim temp file
 *~
+
+# minted
+*_minted*

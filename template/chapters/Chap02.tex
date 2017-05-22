@@ -13,7 +13,7 @@ In this and following chapters, notations are defined in table \ref{tab::Notaion
         \toprule
         Notation & Meaning \\
         \midrule
-        $x$ & a scalar \\
+        $x \: \textrm{or} \: X$ & a scalar \\
         $\mathbf{x}$ & a column vector \\
         $\mathbf{X}$ & a matrix \\
         $\mathbf{x}_i$ & $i_{th}$ column of matrix $\mathbf{X}$ \\
@@ -42,20 +42,20 @@ for it gets potential to alleviate some important performance limitations facing
 and because it enables so-called heterogeneous integration \cite{Beyne2006Rise}.
 As described in \cite{Beyne20043D}, the 3D stacked devices can be divided into three categories
 by their level of interconnect hierarchy:
-\begin{description}
-    \item[3D-system-in-a-package] (3D-SIP) is the chip level stacking, which means the stacked
+\begin{description}[labelsep=0.5em]
+    \item[3D-system-in-a-package (3D-SIP)] is the chip level stacking, which means the stacked
     dies are designed as a series of well-defined and pre-tested sub-blocks, 
     and the third dimensional connection density is quite low: the available 3D-interconnectivity 
     between two layers is typically only $2\sim5/mm$ along the perimeter of the device or $4\sim9/mm^2$
     when area array packages are used.
     
-    \item[3D-system-on-a-chip] (3D-SoC) connects into a lower level: for systems which need a higher
+    \item[3D-system-on-a-chip (3D-SoC)] connects into a lower level: for systems which need a higher
     interconnectivity between each dies, 3D-SoC directly connect ``tiles'' in these dies rather than dies
     itself. These interconnections must behave as on-chip ``global wiring'' interconnects and thus have low
     resistance and capacitance, allowing for fast interconnects and/or low power interconnectivity.
     This requires a higher 3D connectivity, in the order of $100/mm^2$.
     
-    \item[3D-integrated circuit] (3D-IC) is considered as a ``scaling-driven'' technology 
+    \item[3D-integrated circuit (3D-IC)] is considered as a ``scaling-driven'' technology 
     which connects transistors themselves. The 3D connections are only local interconnections,
     The global on-chip interconnect layers on chip remain essentially 2D interconnect layers.
 \end{description}
@@ -70,6 +70,7 @@ $200mm$ wafers.
 TSV structure introduced several thermal stress problem which harms the reliability of 3D ICs, due to
 two major reasons:
 \begin{itemize}
+    % \setlength\itemsep{1em}
     \item $Cu$ TSV always get a higher thermal conductivity than wafers for their material used.
     Thus, large temperature gradient may appear in the areas around TSVs, which may
     introduce large thermal stress.
@@ -152,7 +153,7 @@ neural network.
 We say neuron $i$ \textit{connect}s to neuron $j$, if the output of neuron $i$ is
 part of the input of neuron $j$.
 If there are $m$ neurons in $j_{th}$ layer, whose outputs are denoted as $\mathbf{y}^{(j)} = y^{(j)}_{1,\cdots,m}$,
-for all $n$ nodes in $j + 1_{th}$ layer, their input is $f^{(j+1)}_{i=1,\cdots,n}={\mathbf{y}^{(j)}}^{\rm T} \cdot \bm{\omega}_i + b_i$,
+for all $n$ nodes in $j + 1_{th}$ layer, their input is $f^{(j+1)}_{i=1,\cdots,n}={\mathbf{y}^{(j)}}^{\rm T} \cdot \boldsymbol{\omega}_i + b_i$,
 we call these two layers are \textit{fully connected}.
 Neurons in a same layer don't connect to each other, but fully connect to its counterparts
 in adjacent layers(so the network called fully-connected ANN). 
@@ -165,7 +166,7 @@ we call this network a \textit{feedforward network}.
 Although the inputs of each neuron is just a simple linear combination of previous
 layers' outputs, the nonlinear activations and layer combinations introduces the
 nonlinearity, which enhances the capability of the ANN model. 
-As reported in \cite{hornik1989multilayer}, universal approximation may be achieved by
+As reported in \cite{hornik1989multilayer}, universal approximation could be achieved by
 such feedforward ANN with only one hidden layer, as long as the hidden layer has enough neurons.
 
 In summary, fully-connected ANN model can perform a nonlinear map $\mathbb{R}^m \to \mathbb{R}^n$,
@@ -175,7 +176,7 @@ dimensional missing, et al.
 The procedure of transforming raw data into well formated and normed inputs $\mathbb{R}^m$ is called
 \textit{feature extraction} or \textit{feature engineering}.
 
-\section{Convolutional Neural Networks}
-As described in \cite{Goodfellow-et-al-2016}, 
+\section{Convolutional Neural Networks} \label{sec::intro_cnn}
+As described in \cite{Goodfellow2016Deep}, 
 
 \section{Optimize Methods for Neural Networks}

@@ -26,7 +26,7 @@ The ANN model achieved accuracy of $RMSE: 0.0779$ in the normed test set, and fa
 in runtime scenario due to simplicity of the ANN model they used.
 The highlights of their work include:
 
-\subsection{FEM Generated Temperature-Stress Dataset}
+\subsection{FEM Generated Temperature-Stress Dataset} \label{sec::FEM-data}
 To best of our current knowledge, \cite{Zhang2016Fast} is the very first work that provide a
 accuracy and substantial dataset of 3D IC temperature-stress info.
 They have built a two-layer 3D IC model with $12\times12$ TSVs uniformly placed
@@ -62,19 +62,20 @@ extremely thin.
 \end{tabularx}
 \caption{Format of Temperature-Stress Dataset}
 \label{tab::t-sformat}
-\end{table}
+\end{table} 
 
-\subsection{Hand-Crafted Feature Extraction}
+\subsection{Hand-Crafted Feature Extraction} \label{sec::hc-fe}
 Based on these observations:
 \begin{itemize}
+    % \setlength\itemsep{1em}
     \item Reliability of 3D IC with TSV structure strongly depends on 
-          the \textit{maximum} of thermal stress.
+          the \textit{maximum} of thermal stress;
     \item The maximum stress always appears within a certain distance from the TSV center.
-          Large mount of temperature informations are redundance.
+          Large mount of temperature informations are redundance;
     \item Having a round structure,
           the TSV and the areas around it have a \textit{rotational symmetry
           property}: two different thermal/stress maps can be the exactly
-          the same after a certain amount of rotation.
+          the same after a certain amount of rotation;
 \end{itemize}
 % TODO: add image for TSV rotation
 \cite{Zhang2016Fast} proposed a feature extraction process: rotate the temperature distribution
@@ -97,6 +98,62 @@ the model achieves the accuracy of $RMSE: 0.0779$ in the $300$ samples test set
 which is also selected randomly with no recurrence to training set after $1000$ iterations.
 
 \section{Automatic Feature Extraction via CNN}
+Although the hand-crafted feature extraction procedure in \ref{sec::hc-fe} is 
+practically proved working in 3D IC reliability analysis jobs,
+we may archive a better accuracy by refine this feature extraction procedure.
+We believe that the room of refinement still exists, for these reasons:
+\begin{itemize}
+    % \setlength\itemsep{1em}
+    \item Since one may not intuitively give the stress value $y\in\mathbb{R}$
+    by a temperature distribution, the feature mapping relationship could be
+    much more complex than na\"ive uniform selection and rotational symmetry proposed
+    in section \ref{sec::hc-fe};
+    \item Rotating input data is a common data augmentation procedure in neural
+    network training\cite{Goodfellow2016Deep}, 
+    so the maximum temperature line alignment could be unnecessary,
+    even harm to the accuracy of result;
+    \item As described in section \ref{sec::hc-fe}, maximum stress is not related to
+    the whole temperature distribution but little around TSVs. But in fully-connected
+    ANN model, the output $\mathbf{y}\in\mathbb{R}^n$ depends on all of model input 
+    $\mathbf{x}\in\mathbb{R}^m$. This may introduce strong noise into result.
+\end{itemize}
+
+As described in section \ref{sec::intro_cnn}, convolutional network has been proved as
+an effective local feature extraction method. Due to its property of sparse interaction
+and parameter sharing, CNN model could be quite suitable for 3D IC reliability analysis jobs.
+
+\subsection{Data Preprocessing}
+In this work, we use the same temperature-stress dataset in \cite{Zhang2016Fast}. 
+For facilitating the procedure of convolution feature extraction, 
+the inputs of CNN should be well formatted. 
+The data preprocessing steps are listed as following:
+
+\begin{description}[labelsep=0.5em]
+    \item[Data Interpolation] Follow \cite{Zhang2016Fast}, we interpolate the $N$ data points 
+    around each TSV $\left(x,y,temp\right)_{1,\cdots,N}$
+    to a temperature matrix $\mathbf{T}\in\mathbb{R}^2$.
+    Note that distribution of valid data points generated in FEM model is dense in
+    the area around TSVs, and it becomes sparser where far from TSVs.
+    % TODO:  add image of temperature data points distribution
+    Based on this observation, we only take $N$ temperature points whose distance to its nearing TSV 
+    $r \le r_{thresh} \times l$ for interpolation. Where $l$ denotes the distance of adjacent TSVs,
+    $r_{thresh}$ the distance threshold ratio for data points selection. \label{itm::interp}
+    In this work, we set $r_{thresh}=0.2$, and get $N=91$ as a result.
+    
+    \item[Train-Val Splitting] Since \cite{Zhang2016Fast} didn't give their partition of dataset,
+    we use the toolbox \texttt{scikit-learn} to split the whole dataset into train set and test set.
+    The ratio of train / test is $0.7 / 0.3$, precisely there are $1915$ samples in train set and
+    $821$ samples in test set.
+    
+    \item[Whitening] It has been long known that the network training converges faster 
+    if its inputs are whitened – i.e., 
+    linearly transformed to have zero means and unit variances, and decorrelated \cite{orr2003neural}.
+    Thus we perform this linear transport to interpolated data matrix: 
+    $\mathbf{T}^* = \frac{\mathbf{T} - \mathbf{M}}{\sigma}$, 
+    where $\mathbf{M}$ is the mean value matrix of the training set, $\sigma$ the variances of the training set.
+     
+\end{description}
+
 \subsection{A LeNet Based Model}
 LeNet is a very early 
 \subsection{A Tiny VGG-Net Based Model}
