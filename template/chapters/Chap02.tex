@@ -5,7 +5,7 @@
 In this chapter, we introduce the conceptions of three dimensional integrated circuits, its thermal behavior, 
 basic convolutional neural networks and its optimize methods.
 
-In this and following chapters, notations are defined in table \ref{tab::Notaion}.
+In this and following chapters, notations are defined as table \ref{tab::Notaion}.
 
 \begin{table}[htb]
     \centering
@@ -16,6 +16,7 @@ In this and following chapters, notations are defined in table \ref{tab::Notaion
         $x \: \textrm{or} \: X$ & a scalar \\
         $\mathbf{x}$ & a column vector \\
         $\mathbf{X}$ & a matrix \\
+        $\mathcal{X}$ & a dataset \\
         $\mathbf{x}_i$ & $i_{th}$ column of matrix $\mathbf{X}$ \\
         $x_{ij}$ & $j_{th}$ element of $i_{th}$ column in matrix $\mathbf{X}$ \\ 
         $x_j$ & $j_{th}$ element of column vector $\mathbf{x}$ \\
@@ -111,7 +112,7 @@ modulus, $\nu$ the Poisson ratio, $\alpha$ the thermal expansion, $T$ the temper
 $\lambda$ the Lam\'e coefficients. Note that in practical scenarios, $f_z$ is always $0$ so we may
 pass the evaluation of $f_z$ to accelerate the simulation \cite{Marella2015A}.
 
-Equation \ref{equ::f_xyz} is the theoretic fundamental of finite element method (FEM) to build accurate model for simulating the
+Equation \eqref{equ::f_xyz} is the theoretic fundamental of finite element method (FEM) to build accurate model for simulating the
 thermal-mechanical stress in a complicated 3D IC structure with TSVs. Given a thermal distribution
 data of a IC layout, we can simulate its related stress information accurately via FEM based models.
 However, this method is quite computational expensive, which make it not practical to apply

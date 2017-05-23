@@ -9,7 +9,7 @@ CNNs used in computer vision jobs such as object detection and face recognition.
 We will specify these models' structure, and how they differ from their inceptions
 to be fitted into 3D IC reliability runtime analysis jobs.
 Finally, we apply this method to the dataset in \cite{Zhang2016Fast},
-get a promising accuracy and economic computing cost.
+get a promising accuracy with economic computing cost.
 The details of this experiment are demonstrated in the last section.
 
 \section{A Fully-Connected ANN Model}
@@ -35,11 +35,14 @@ The size of whole chip is $1cm\times1cm\times300\mu m$, and it is
 divided into $4\times4$ same sized blocks to represent $16$ cores,
 both of the two layers are $1cm\times1cm\times100\mu m$. 
 For the TSV structure, they set the values of $r_i$ and $r_o$
+% TODO: demostrate $r_i$ and $r_o$
 as $20\mu m$ and $24\mu m$, respectively. They also couple
 the solid heat conduction field and the solid mechanical field.
 
-Applying different thermal distribution to above model, they generated $N=2736$
+Applying different thermal distribution to above model, they generated $2736$
 pairs of temperature-stress data that can be used in neural network training.
+We denote this dataset as $\mathcal{D}$, 
+and its quality as $N_\mathcal{D}=2736$.
 The format of their data is like table \ref{tab::t-sformat}
 \footnote{These data in tabular are randomly selected in dataset of \cite{Zhang2016Fast}}.
 Note that the coordinate of $z$ is always $0$, because the dies in 3D IC are
@@ -85,8 +88,9 @@ values uniformly from this interpolated matrix by the Cartesian distance. The pr
 illustrated as figure TODO.
 
 After above precess, the raw text data can be transfered to vectors 
-$\mathbf{x}_{i=1,\cdots,N} \in \mathbb{R}^{320}$, with relevant maximum stress 
-$y_{i=1,\cdots,N} \in \mathbb{R}$,
+$\mathbf{x}_{i=1,\cdots,N_\mathcal{D}} \in \mathbb{R}^{320}$, 
+with relevant maximum stress 
+$y_{i=1,\cdots,N_\mathcal{D}} \in \mathbb{R}$,
 we may train the ANN model with these dataset.
 
 \subsection{A Fast Fully-Connected ANN Model}
@@ -94,7 +98,7 @@ The ANN model used in this method uses a simple two layers structure.
 The input layer gets $55$ neurons, and hidden layer $15$ neurons, finally a $1$ neuron layer
 to output the approximated maximum stress value.
 Training with $2400$ samples randomly selected from whole temperature-stress dataset,
-the model achieves the accuracy of $RMSE: 0.0779$ in the $300$ samples test set 
+the model achieves the accuracy of RMSE(Rooted Mean Square Error) $0.0779$ in the $300$ samples test set 
 which is also selected randomly with no recurrence to training set after $1000$ iterations.
 
 \section{Automatic Feature Extraction via CNN}
@@ -108,14 +112,20 @@ We believe that the room of refinement still exists, for these reasons:
     by a temperature distribution, the feature mapping relationship could be
     much more complex than na\"ive uniform selection and rotational symmetry proposed
     in section \ref{sec::hc-fe};
+    
     \item Rotating input data is a common data augmentation procedure in neural
     network training\cite{Goodfellow2016Deep}, 
     so the maximum temperature line alignment could be unnecessary,
     even harm to the accuracy of result;
+    
     \item As described in section \ref{sec::hc-fe}, maximum stress is not related to
     the whole temperature distribution but little around TSVs. But in fully-connected
     ANN model, the output $\mathbf{y}\in\mathbb{R}^n$ depends on all of model input 
     $\mathbf{x}\in\mathbb{R}^m$. This may introduce strong noise into result.
+    
+    \item Hand-crafted feature extraction makes the train-predict procedure not
+    end-to-end. One have to design such extraction to make model work, instead of
+    let the model learn the feature itself.
 \end{itemize}
 
 As described in section \ref{sec::intro_cnn}, convolutional network has been proved as
@@ -139,23 +149,128 @@ The data preprocessing steps are listed as following:
     $r \le r_{thresh} \times l$ for interpolation. Where $l$ denotes the distance of adjacent TSVs,
     $r_{thresh}$ the distance threshold ratio for data points selection. \label{itm::interp}
     In this work, we set $r_{thresh}=0.2$, and get $N=91$ as a result.
+    Consider $N$ is not large enough, the interpolation size is set to $28\times28$,
+    same to the MINST handwritten dataset \cite{lecun1998gradient}.
+       
+    \item[Train-Test Splitting] Since \cite{Zhang2016Fast} didn't give their partition of dataset $\mathcal{D}$,
+    we use the \texttt{scikit-learn} toolbox to split the whole dataset into 
+    train set $\mathcal{D}_{\textrm{train}}$ and test set $\mathcal{D}_{\textrm{test}}$
+    by randomly selection.
+    The ratio of train/test is $0.7 / 0.3$, precisely there are 
+    $N_{\mathcal{D}_{\textrm{train}}}=1915$ samples in train set
+    and $N_{\mathcal{D}_{\textrm{test}}}=821$ samples in test set.
     
-    \item[Train-Val Splitting] Since \cite{Zhang2016Fast} didn't give their partition of dataset,
-    we use the toolbox \texttt{scikit-learn} to split the whole dataset into train set and test set.
-    The ratio of train / test is $0.7 / 0.3$, precisely there are $1915$ samples in train set and
-    $821$ samples in test set.
-    
-    \item[Whitening] It has been long known that the network training converges faster 
+    \item[Whitening Input] It has been long known that the network training converges faster 
     if its inputs are whitened – i.e., 
     linearly transformed to have zero means and unit variances, and decorrelated \cite{orr2003neural}.
     Thus we perform this linear transport to interpolated data matrix: 
     $\mathbf{T}^* = \frac{\mathbf{T} - \mathbf{M}}{\sigma}$, 
-    where $\mathbf{M}$ is the mean value matrix of the training set, $\sigma$ the variances of the training set.
-     
+    where $\mathbf{M}$ is the mean value matrix of the training set \footnote{Note the $\mathbf{M}$
+    here is the capital Greek letter $\mu$ instead of capital English letter m},
+    $\sigma$ the variances of the training set.
+    Also note that $\mu_{\left(x,y\right)} = \frac{1}{N_{\mathcal{D}_{\textrm{train}}}} \sum_{i=1}^{N_{\mathcal{D}_{\textrm{train}}}} 
+    t^{\left(i\right)}_{\left(x,y\right)}$, where $i$ is the index of training samples.
+    
+    \item[Scaling Output] Since the absolute value of target output, the thermal stress, is
+    quite large, it must be normed to avoid large gradient in back propagation.
+    The norm procedure to $y$ is quite straightforward:
+    $\mathbf{y}^* = \mathbf{y} / \max \left(\left|y_{1,\cdots,N_{\mathcal{D}_{\textrm{train}}}}\right|\right)$.
 \end{description}
+Note that when whitening and scaling whole dataset $\mathcal{D}$, we could only use
+$\mathcal{D}_{\textrm{train}}$ to calculate $\mathbf{M}$, $\sigma$, $y_{max}$, and apply them
+to both $\mathcal{D}_{\textrm{train}}$ and $\mathcal{D}_{\textrm{test}}$. Because in practical situations,
+$\mathcal{D}_{\textrm{test}}$ is unknown to the model.
+
+We denote these processed dataset as $\mathcal{D}_{\textrm{train}}^*$, $\mathcal{D}_{\textrm{test}}^*$, respectively.
+The samples in them are formatted as $\left(\mathbf{T}^*, y^*\right)^{(i)}_{i=1,\cdots, N}$,
+where temperature map $\mathbf{T}^*$ are $28 \times 28$ matrix, and normed max stress $y ^ *$ are scalars.
+These form ideal ``x-y'' maps to train neural networks.
 
 \subsection{A LeNet Based Model}
-LeNet is a very early 
+LeNet is a very early CNN structure for handwriting recognition \cite{lecun1998gradient}. Since the temperature map
+$\mathbf{T}^*$ in $\mathcal{D}_{\textrm{train}}^*$ and $\mathcal{D}_{\textrm{test}}^*$ get the same size to MINST dataset,
+LeNet becomes the very first choice to perform feature extraction. 
+
+The very origin purpose of LeNet is recognizing a $28 \times 28$ pixes gray scale picture of hand writing digits (0 to 9),
+decide which digit that picture represents for. The input of LeNet is a $28 \times 28$ matrix $\mathbf{X} \in \mathbb{R}^2$,
+output a $10$ length vector $\mathbf{p}$. $p_{i=0,1,\cdots,9} \in [0, 1]$ is the \textit{probability} of $\mathbf{X}$ to be
+digit $i$. Usually this output follows a \textit{maxout} layer to output that $i$ with maximum probability.
+The structure of LeNet is demonstrated in table \ref{tab::LeNet}.
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{cll}
+        \toprule
+        Layer ID & Layer Type & Configuration \\
+        \midrule
+        conv1 & Convolution & $\left(5\times5\right)$, $20$ \\
+        sig1  & Activation  & Sigmoid \\
+        pool1 & Pooling     & Max, $\left(2\times2\right)$, $2$ \\
+        conv2 & Convolution & $\left(5\times5\right)$, $50$ \\
+        sig2  & Activation  & Sigmoid \\
+        pool2 & Pooling     & Max, $\left(2\times2\right)$, $2$ \\
+        flat  & Flatten     & \\
+        fc1   & Fully-Connected & $500$ \\
+        sig3  & Activation  & Sigmoid \\
+        fc2   & Fully-Connected & $10$ \\
+        maxout & Maxout     & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Structure of Original LeNet (top to down)}
+    \label{tab::LeNet}
+\end{table}
+Note that in table \ref{tab::LeNet}, the meanings of ``Configuration'' of each layer types are:
+\begin{description}[labelsep=0.5em]
+    \item[Convolution] Convolution kernel size, number of channels
+    \item[Activation] Type of activation function
+    \item[Pooling] Pooling type, pooling kernel size, number of channels
+    \item[Fully-Connected] number of hidden units
+\end{description}
+And the ``Flatten'' layer transforms the output of pool2, which is the feature been extracted
+with shape $batch\_size \times channel\_num \times height \times width \in \mathbb{R}^4$, into
+$batch\_size \times channel\_num \cdot height \cdot width \in \mathbb{R}^2$ as input of following
+fully-connected layers.
+
+To fit into the 3D IC runtime reliability analysis job with samples as 
+$\left(\mathbf{T}^*, y^*\right)^{(i)}_{i=1,\cdots, N}$,
+we modified the original LeNet as following:
+\begin{itemize}
+    \item The number of channels in layer fc1 is changed to $50$, to maintain a same order of magnitude
+    with the fully-connected ANN model in \cite{Zhang2016Fast}. 
+    And number of channels in layer fc2 is changed to $1$, because our model
+    only needs to output a scalar as the approximation of normed maximum stress $y ^ *$.
+    \item The activation layers are all changed into tanh activated, formally
+    \begin{equation}
+    \tanh (x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+    \end{equation}
+    because we experimentally found this will significantly improve the accuracy of result.
+    \item Since we don't need to pick an index with maximum probability anymore, the maxout
+    layer could be removed.
+\end{itemize}
+After all, our LeNet based model for 3D IC runtime reliability analysis job is structured as table \ref{tab::LeNet'}.
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{cll}
+        \toprule
+        Layer ID & Layer Type & Configuration \\
+        \midrule
+        conv1 & Convolution & $\left(5\times5\right)$, $20$ \\
+        tanh1  & Activation  & Tanh \\
+        pool1 & Pooling     & Max, $\left(2\times2\right)$, $2$ \\
+        conv2 & Convolution & $\left(5\times5\right)$, $50$ \\
+        tanh2  & Activation  & Tanh \\
+        pool2 & Pooling     & Max, $\left(2\times2\right)$, $2$ \\
+        flat  & Flatten     & \\
+        fc1   & Fully-Connected & $50$ \\
+        tanh3  & Activation  & Tanh \\
+        fc2   & Fully-Connected & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Structure of Modified LeNet (top to down)}
+    \label{tab::LeNet'}
+\end{table}
+In our experiment, this model outperforms the fully-connected ANN model in \cite{Zhang2016Fast}
+with great advantage.
+
 \subsection{A Tiny VGG-Net Based Model}
 
 \section{CNN-Stress: an End-to-End Process}
