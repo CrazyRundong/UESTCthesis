@@ -21,7 +21,8 @@ that could be used in runtime scenario.
 \cite{Zhang2016Fast} proposed a two-layers fully connected ANN model with hand-crafted
 feature extraction, then train this model by large amount of $(T \to F_{\left\{x,y,x\right\}})$ data
 generated off-line by FEM based model. 
-The ANN model achieved accuracy of $RMSE: 0.0779$ in the normed test set, and fast enough 
+The ANN model achieved accuracy of RMSE(Rooted Mean Square Error) $0.0779$
+in the normed test set, and fast enough 
 ($300 TSVs / 0.06s$ @ 2.4 GHz, 1 core) to be applied
 in runtime scenario due to simplicity of the ANN model they used.
 The highlights of their work include:
@@ -98,8 +99,8 @@ The ANN model used in this method uses a simple two layers structure.
 The input layer gets $55$ neurons, and hidden layer $15$ neurons, finally a $1$ neuron layer
 to output the approximated maximum stress value.
 Training with $2400$ samples randomly selected from whole temperature-stress dataset,
-the model achieves the accuracy of RMSE(Rooted Mean Square Error) $0.0779$ in the $300$ samples test set 
-which is also selected randomly with no recurrence to training set after $1000$ iterations.
+the model achieves the accuracy of RMSE(Rooted Mean Square Error) $0.0779$ in the $300$ samples test set,
+which is also randomly selected with no recurrence to training set, after $1000$ iterations.
 
 \section{Automatic Feature Extraction via CNN}
 Although the hand-crafted feature extraction procedure in \ref{sec::hc-fe} is 
@@ -222,9 +223,11 @@ Note that in table \ref{tab::LeNet}, the meanings of ``Configuration'' of each l
 \begin{description}[labelsep=0.5em]
     \item[Convolution] Convolution kernel size, number of channels
     \item[Activation] Type of activation function
-    \item[Pooling] Pooling type, pooling kernel size, number of channels
+    \item[Pooling] Pooling type, pooling kernel size, stride of pooling kernel
     \item[Fully-Connected] number of hidden units
 \end{description}
+All Convolution kernels stride with step of $(1 \times 1)$ (vertical, horizontal),
+and with no padding.
 And the ``Flatten'' layer transforms the output of pool2, which is the feature been extracted
 with shape $batch\_size \times channel\_num \times height \times width \in \mathbb{R}^4$, into
 $batch\_size \times channel\_num \cdot height \cdot width \in \mathbb{R}^2$ as input of following
@@ -268,11 +271,83 @@ After all, our LeNet based model for 3D IC runtime reliability analysis job is s
     \caption{Structure of Modified LeNet (top to down)}
     \label{tab::LeNet'}
 \end{table}
-In our experiment, this model outperforms the fully-connected ANN model in \cite{Zhang2016Fast}
+In our experiment \ref{sec::exper}, this model outperforms the fully-connected ANN model in \cite{Zhang2016Fast}
 with great advantage.
 
 \subsection{A Tiny VGG-Net Based Model}
+VGG-Net is a very deep CNN architecture proposed by Visual Geometry Group (VGG) of Oxford \cite{simonyan2014very}.
+Its original purpose is to solve the ImageNet Large-ScaleVisual Recognition Challenge
+(ILSVRC-2014) image classification task \cite{russakovsky2015imagenet}.
+Equipped with very small convolution kernels ($3 \times 3$), the VGG-Net could exploit from very deep
+stacked convolution layers.
+
+VGG-Net has several variants, with depth from 11 weight layers (8 conv. and 3 FC layers) 
+to 19 weight layers in the network (16 conv. and 3 FC layers). For the input size of $\mathcal{D}^*$
+is much smaller to VGG-Net's input size ($28 \times 28$ vs. $224 \times 224$),
+we select the smallest variant as our inception to make sure data samples in $\mathcal{D}^*$ could ``feed'' the net.
+Structure of this variant is demonstrated in table \ref{tab::VGG-Net}.
+
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{cll}
+        \toprule
+        Layer ID & Layer Type & Configuration \\
+        \midrule
+        conv1 & Convolution & $\left(3\times3\right)$, $64$ \\
+        pool1 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv2 & Convolution & $\left(3\times3\right)$, $128$ \\
+        pool2 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv3 & Convolution & $\left(3\times3\right)$, $256$ \\
+        conv4 & Convolution & $\left(3\times3\right)$, $256$ \\
+        pool3 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv5 & Convolution & $\left(3\times3\right)$, $512$ \\
+        conv6 & Convolution & $\left(3\times3\right)$, $512$ \\
+        pool4 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv7 & Convolution & $\left(3\times3\right)$, $512$ \\
+        conv8 & Convolution & $\left(3\times3\right)$, $512$ \\
+        pool5 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        fc1   & Fully-Connected & $4096$ \\
+        fc2   & Fully-Connected & $4096$ \\
+        fc3   & Fully-Connected & $1000$ \\
+        sf    & Soft-Max      & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Structure of shallow VGG-Net}
+    \label{tab::VGG-Net}
+\end{table}
+
+Note that we omit the activation layers in \ref{tab::VGG-Net} for conciseness. 
+Precisely each ``Convolution'' layer is a convolution unit structured as \ref{tab::VGG-CU}.
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{cll}
+        \toprule
+        Layer ID & Layer Type & Configuration \\
+        \midrule
+        conv\textit{i} & Convolution & \textit{conv config} \\
+        relu\textit{i} & Activation  & ReLU \\
+        \bottomrule
+    \end{tabular}
+    \caption{Convolution unit in \ref{tab::VGG-Net}}
+    \label{tab::VGG-CU}
+\end{table}
+The activation layers in these convolution units are equipped with Rectified Linear Units (ReLU)
+activation function, formally $g(x) = \max (0, x)$. 
+Rectified linear units are easy to optimize because they are so similar to linear units. 
+The only difference between a linear unit and a rectified linear unit is that a rectified linear unit outputs zero across half its domain. 
+This makes the derivatives through a rectified linear unit remain large whenever the unit is active.
+The gradients are not only large but also consistent. The second derivative of the rectifying operation is $0$ almost everywhere, 
+and the derivative of the rectifying operation is $1$ everywhere that the unit is active. 
+This means that the gradient direction is far more useful for learning than it would be with activation functions
+that introduce second-order effects.
+    
+The images in ILSVRC-2014 are classified into $1000$ classes (human, dogs, cars, etc.),
+so the fc3 layer in VGG-Net gets $1000$ hidden neurons to output the probability of input being
+such class.
+To correctly output the desired maximum stress approximation,
+we replace all fully-connected layers in this structure to flat and bellow layers in configuration
+\ref{tab::LeNet'}.
 
 \section{CNN-Stress: an End-to-End Process}
 
-\section{Experiments}
+\section{Experiments} \label{sec::exper}

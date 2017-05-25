@@ -1,3 +1,138 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter{Origin Material}
+\chapter{\centering{3D Interconnection and Packaging:} \protect \\
+    \centering{Impending Reality or Still a Dream?}}
+
+As integrated circuit technology continuously improves its integration
+capabilities, and SoC is a possibility, the limitations of 2D-interconnects
+are more obvious. Integrated circuits are partioned in function
+blocks (``tiles'') that are interconnected using routing in parallel
+planes (2D). With the scaling of the technology, these long lines
+have become the speed-limiting factor on the chip, as well as a significant
+source for power consumption. If the functional ``tiles'' on the
+chip could be stacked in three dimensions, the chip area would be
+reduced and much shorter interconnects between would result.
+
+Current developments in packaging technology, originally developed
+in the field of MEMS technology, are delivering the key
+enabling technologies for building 3D stacked devices. These are:
+\begin{itemize}
+    \item Thinning of wafers, below 50μm and down to the active
+    layer.
+    \item Wafer-to-wafer bonding techniques, up to 300mm diameter
+    wafers.
+    \item Die-to-wafer bonding
+    \item Wafer-through-hole technologies: electrically isolated connections
+    through $Si$.
+\end{itemize}
+
+The 3D interconnects may be realized at different levels of the
+interconnect hierarchy. They can be realized at the chip-level,
+interconnecting the ``traditional'' pins of the die in the third
+dimension. This is defined as a 3D-``system-in-a-package'' (3D-SIP)
+approach. The interconnectivity in the third dimension is
+rather poor in this approach as connections pass through ``package
+pins''. The available 3D-interconnectivity between two layers is
+typically only $2-5/mm$ along the perimeter of the device or $4-9/mm^2$
+when area array packages are used. Due to these limitations, this
+approach is limited to stacking of dies with limited pin count and
+limited interconnectivity between the die. Each layer of the stack
+is a ``sub''-system on a chip or system-in-a-package.
+
+Many systems require a much higher interconnectivity between
+each die in the stack. Circuit blocks (``tiles'') within a die need
+interconnections to circuit blocks on another die, without passing
+through the regular chip I/O pads. These interconnections must
+behave as on-chip ``global wiring'' interconnects and thus have low
+resistance and capacitance, allowing for fast interconnects and/or
+low power interconnectivity. This is defined as a 3D-``system-on-a-chip'' (3D-SoC). 
+One particular potential example is the stacking
+of a memory die on a logic IC, where logic-``tiles'' are directly
+addressing smaller memory banks on the memory die, without
+going through the central bus. This requires a 3D interconnectivity,
+in the order of $100/mm^2$.
+
+Finally the 3D interconnects are envisaged at the lowest level,
+the transistors themselves. In this case, the technology should
+be considered a ``scaling-driven'' technology, integrating more
+transistors per unit area. The 3D interconnects are only local
+interconnects. The global on-chip interconnect layers on chip
+remain essentially 2D interconnect layers. This is defined as a
+``3D-integrated circuit'' technology (3D-IC).
+
+In order to be successful, 3D-SIP, 3D-SoC or 3D-IC technologies
+need to become manufacturable technologies. In particular a
+high yield has to be reached. Preferably, individual layers are
+processed in parallel, tested and finally, stacked as ``known-gooddevices''.
+This goal is likely to be reached first for 3D-SIP, followed
+by 3D-SoC. It is much further out for 3D-IC technologies.
+
+For the realization of a 3D-SIP, a relatively low interconnect density
+in the third dimension is available. Each layer should therefore
+consist of a well-defined sub-circuit block, using SoC-technology
+to enable a small sized solution. These components,
+which may be individual SIP packages are preferably pre-tested
+(``known-good-SIP'') to ensure a high final assembly yield.
+
+An example of a 3D-SIP integration scheme, realized at IMEC, is
+a fully integrated low power rf transceiver shown in TODO.
+This device measures only $7 \times 7 mm$ and consists of two CSP-type
+devices (CSP=``Chip-Scale-Package''). The top CSP is realized
+using IMEC's rf-MCM-D technology with integrated passives.[1]
+The bottom CSP is a double-sided high-density printed circuit
+board with a high density flip chip die on the bottom side and
+several discrete passive components mounted on the topside.
+The connection of this bottom part to the top part is obtained by
+using solder balls on the topside of the bottom laminate and
+encapsulation of the topside devices.
+
+One example of a 3D-SoC technology is the, ``ultra thin chip stacking''
+technology (UTCS), under development at IMEC.[2] A
+schematic build-up is shown in Figs. 7.4.2 and 7.4.3. In this structure,
+IC's, thinned down to $10-15 \mu m$, are embedded inside a multilayer
+thin film build-up, realized on a base CMOS wafer. This
+requires a technique to thin and transfer the active die. An example
+of an embedded die is shown in Fig. 7.4.4.
+
+By using thin film lithography, a very high number of interconnects
+can be realized between dies. This allows for additional
+interconnects between sub-sections of the die. In the case of the
+proposed UTCS structure, via connections in the third dimension
+are realised in the area around the chips. As these thin film vias
+are realized with pad sizes smaller than $50mm$, a very high
+interconnect density in the third dimension is obtained.
+
+For the realization of such 3D-SoC structures, very aggressive
+wafer and die thinning is used, eventually reducing the die to the
+active circuit layer. The use of very thin layers is improves the 3D-connectivity
+as it relaxes the required aspect ratios for these structures.
+It is also important for the thermal performance of the stack.
+The heat flow in such a structure is considered to be almost one dimensional.
+The heat flows vertically through the different layers
+of the stack with little lateral spreading. For the UTCS structure,
+lateral heat flow is limited to about $100-200mm$. The ``package'' of
+the 3D-SoC evauates the heat to the ambient, similar to traditional
+packages. A further limiting factor to the allowable heat dissipation
+of the stack is its internal thermal resistance. To realize such
+stacks, thin polymeric dielectric films are used as ``glue'' – layers,
+which dominate the thermal performance of the stack. The thermal
+resistance of 1mm polymer is about equivalent to $10\mu m \; SiO_2$
+(BEOL), to $1mm$ of $Si$ or to $2mm$ of copper. For structures similar
+to the one shown in Fig. 7.4.3, a thermal interface resistance of $0.3$
+to $0.75 K/W$ was measured ($0.5 K/W = \textrm{a} 10\mu m$ thick polymer (BCB)
+interface layer).To reduce the thermal resistance of the sandwich
+layer, vertical metal structures are used as they conduct heat much
+more efficiently ($Cu$ is $2\times$ better than $Si$). They are, however, only
+efficient if they are realized as via connections through the die area.
+
+Also of major concern is the electrical integrity of the transferred
+and transplanted die. In order to investigate this issue, $16 \; 20\times20
+mm\;0.35 \mu m$ CMOS test die were measured before and after thinning
+to $45 \mu m$ (wafer level) and after further thinning to $15 \mu m$ and
+transfer to a host substrate. Some typical results are shown in figure
+5 and 6. Given the proper process conditions, standard CMOS
+die can be thinned to very thin layers without yield loss.
+
+3D interconnection and packaging is one of the most active R\&D
+topics. Enabling technologies for realizing 3D interconnects
+coincide with a growing need for heterogeneous system integration
