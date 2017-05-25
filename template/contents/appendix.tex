@@ -1,9 +1,7 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter{Derivation of Back Propagation}
-
-\chapter{Code of This Work}
-The source code is available in my GitHub
+\chapter{Source Code of This Work}
+The source code is available on my GitHub repo \texttt{deep-stress}
 (\url{https://github.com/CrazyRundong/deep-stress}).
 For thesis format requirements, code are also attached here.
 
@@ -152,4 +150,237 @@ def main(npz_path=data_path):
 if __name__ == '__main__':
     main('./Data/comsol_new.npz')
 
+\end{minted}
+
+\section{Net Constructing}
+\begin{minted}[mathescape, linenos, breaklines]{python}
+# -*- coding: utf-7 -*-
+import mxnet as mx
+
+
+# LeNet
+def build_lenet():
+data = mx.symbol.Variable('data')
+label = mx.symbol.Variable('reg_label')
+# first conv layer
+conv1 = mx.sym.Convolution(data=data, kernel=(5, 5), num_filter=20)
+tanh1 = mx.sym.Activation(data=conv1, act_type="tanh")  # tanh
+pool1 = mx.sym.Pooling(data=tanh1, pool_type="max", kernel=(2, 2), stride=(2, 2))
+# second conv layer
+conv2 = mx.sym.Convolution(data=pool1, kernel=(5, 5), num_filter=50)
+tanh2 = mx.sym.Activation(data=conv2, act_type="tanh")
+pool2 = mx.sym.Pooling(data=tanh2, pool_type="max", kernel=(2, 2), stride=(2, 2))
+# first fullc layer
+flatten = mx.sym.Flatten(data=pool2)
+fc1 = mx.symbol.FullyConnected(data=flatten, num_hidden=25)  # origin lenet get 500 nodes
+tanh3 = mx.sym.Activation(data=fc1, act_type="tanh")
+# second fullc
+fc2 = mx.sym.FullyConnected(data=tanh3, num_hidden=1)
+# softmax loss
+# lenet = mx.sym.SoftmaxOutput(data=fc2, name='softmax')
+lenet = mx.sym.LinearRegressionOutput(data=fc2, label=label, name='linear_reg')
+
+return lenet
+
+
+# Dark Net in YOLO 2000
+def build_conv_block(**kwargs):
+conv = mx.sym.Convolution(**kwargs)
+bn = mx.sym.BatchNorm(data=conv, fix_gamma=False, eps=1e-5 + 1e-10, momentum=0.9,)
+lkReLU = mx.sym.LeakyReLU(data=bn)
+# lkReLU = mx.sym.Activation(data=bn, act_type="relu")
+
+return lkReLU
+
+
+def build_conv_pool_block(*args, **kwargs):
+n_conv, n_pool = args
+data = kwargs['data']
+for i in range(n_conv):
+data = build_conv_block(data=data, **kwargs['conv{}'.format(i)])
+if n_pool:
+pool = mx.sym.Pooling(data=data, **kwargs['pool'])
+else:
+pool = data
+
+return pool
+
+
+def build_tiny_yolo():
+data = mx.sym.Variable('data')
+label = mx.sym.Variable('reg_label')
+pool1 = build_conv_pool_block(4, 1,
+data=data,
+conv0={'kernel': (1, 1), 'stride': (1, 1), 'pad': (0, 0), 'num_filter': 16},
+conv1={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 32},
+conv2={'kernel': (1, 1), 'stride': (1, 1), 'pad': (0, 0), 'num_filter': 16},
+conv3={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 32},
+pool={'kernel': (2, 2), 'stride': (2, 2), 'pool_type': 'max'})
+pool2 = build_conv_pool_block(4, 1,
+data=pool1,
+conv0={'kernel': (1, 1), 'stride': (1, 1), 'pad': (0, 0), 'num_filter': 32},
+conv1={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 256},
+conv2={'kernel': (1, 1), 'stride': (1, 1), 'pad': (0, 0), 'num_filter': 32},
+conv3={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 256},
+pool={'kernel': (2, 2), 'stride': (2, 2), 'pool_type': 'avg'})
+flatten = mx.sym.Flatten(data=pool2)
+# fc1 = mx.symbol.FullyConnected(data=pool2, num_hidden=50)
+# fc1_lkReLU = mx.sym.LeakyReLU(data=fc1)
+fc2 = mx.symbol.FullyConnected(data=flatten, num_hidden=1)
+yolo = mx.sym.LinearRegressionOutput(data=fc2, label=label, name='linear_reg')
+
+return yolo
+
+
+# Our New Net
+def build_net_a():
+""" based on the insight of VGG Net:
+2 * Conv((3, 3), stride=1, pad=1) == Conv((5, 5), stride=1, pad=1)
+n_channel *= 2 after each pooling layer
+we follow the channel num of LeNet
+"""
+data = mx.sym.Variable('data')
+label = mx.sym.Variable('reg_label')
+pool1 = build_conv_pool_block(2, 1,
+data=data,
+conv0={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 20},
+conv1={'kernel': (1, 1), 'stride': (1, 1), 'pad': (0, 0), 'num_filter': 40},
+conv2={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 20},
+pool={'kernel': (2, 2), 'stride': (2, 2), 'pool_type': 'max'})
+pool2 = build_conv_pool_block(2, 1,
+data=pool1,
+conv0={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 40},
+conv1={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 40},
+pool={'kernel': (2, 2), 'stride': (2, 2), 'pool_type': 'max'})
+pool3 = build_conv_pool_block(2, 1,
+data=pool2,
+conv0={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 80},
+conv1={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 80},
+pool={'kernel': (2, 2), 'stride': (2, 2), 'pool_type': 'max'})
+pool4 = build_conv_pool_block(2, 1,
+data=pool3,
+conv0={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 160},
+conv1={'kernel': (3, 3), 'stride': (1, 1), 'pad': (1, 1), 'num_filter': 160},
+pool={'kernel': (2, 2), 'stride': (2, 2), 'pool_type': 'max'})
+flatten = mx.sym.Flatten(data=pool4)
+fc1 = mx.symbol.FullyConnected(data=flatten, num_hidden=50)  # origin lenet get 500 nodes
+tanh3 = mx.sym.Activation(data=fc1, act_type="tanh")
+# second fullc
+fc2 = mx.sym.FullyConnected(data=tanh3, num_hidden=1)
+# softmax loss
+net_a = mx.sym.LinearRegressionOutput(data=fc2, label=label, name='linear_reg')
+
+return net_a
+\end{minted}
+
+\section{Training and Predicting}
+\begin{minted}[mathescape, linenos, breaklines]{python}
+# -*- coding: utf-8 -*-
+import src.prepare_data as Data
+import src.build_Nets as Net
+
+import mxnet as mx
+import numpy as np
+from sklearn.metrics import mean_squared_error
+from matplotlib import pyplot as plt
+
+import os
+import logging
+from enum import Enum
+from datetime import datetime
+logging.getLogger().setLevel(logging.DEBUG)
+
+
+class NetType(Enum):
+lenet = 1,
+vgg_like = 2
+
+
+def main(net_type=NetType.vgg_like, draw_net=False):
+batch_size = 256
+momentum = 0.9
+num_epoch = 100
+disp_batch = 50
+num_batch = 1  # num_batch of val
+num_plot = 25
+
+base_lr = 0.01
+lr_rescan_epoch = 250
+lr_rescan_factor = 0.9
+
+data_path = './Data/comsol_crops.npz'
+# data_path = './Data/comsol_new.npz'
+module_prefix = './Module/'
+
+if not os.path.exists(data_path):
+Data.main()
+data_set = np.load(data_path)
+x_train = data_set['temp_train']
+x_val = data_set['temp_val']
+y_train = data_set['stress_train']
+y_val = data_set['stress_val']
+max_temp = data_set['max_temp']
+max_stress = data_set['max_stress']
+
+train_iter = Data.generate_mx_array_itr(x_train, y_train, batch_size)
+val_iter = Data.generate_mx_array_itr(x_val, y_val, batch_size, shuffle_=False)
+
+if net_type == NetType.lenet:
+net = Net.build_lenet()
+module_prefix += "lenet_"
+else:
+net = Net.build_net_a()
+module_prefix += "vgg_like_"
+
+# show model
+if draw_net:
+g = mx.viz.plot_network(net, shape={'data': (batch_size, 1,) + x_train.shape[-2:], 'reg_label': (batch_size,)})
+g.render()
+
+metric = mx.metric.RMSE()
+lr_sch = mx.lr_scheduler.FactorScheduler(step=lr_rescan_epoch, factor=lr_rescan_factor)
+ckpoint = mx.callback.do_checkpoint(module_prefix, period=25)
+
+model = mx.mod.Module(
+context=mx.gpu(0),
+symbol=net,
+data_names=['data'],
+label_names=['reg_label']
+)
+model.fit(
+train_iter,
+eval_data=val_iter,
+optimizer='sgd',
+optimizer_params={'learning_rate': base_lr, 'momentum': momentum, 'lr_scheduler': lr_sch},
+eval_metric=metric,
+num_epoch=num_epoch,
+epoch_end_callback=ckpoint,
+# epoch_end_callback=mx.callback.Speedometer(batch_size, disp_batch),
+# initializer=mx.init.Xavier(),
+)
+score = model.score(val_iter, metric)
+for idx_, score_ in score:
+print('Module {} score: {}'.format(idx_, score_))
+
+itm_num = batch_size * num_batch
+plot_idx = np.random.choice(itm_num, num_plot, replace=False)
+
+# timing the predict process
+t_start = datetime.now()
+predict_stress = model.predict(val_iter, num_batch)
+t_stop = datetime.now()
+pred_speed = itm_num / (t_start - t_stop).microseconds / 1000.
+
+gt_stress = y_val[plot_idx]
+predict_stress = predict_stress.asnumpy()[plot_idx]
+
+mse = mean_squared_error(gt_stress * max_stress, predict_stress * max_stress)
+print("MSE: {}\nSpeed for prediction: {} samples/s".format(mse, pred_speed))
+plt.plot(range(num_plot),
+gt_stress * max_stress, 'go',
+predict_stress * max_stress, 'rx')
+plt.show()
+
+if __name__ == '__main__':
+main()
 \end{minted}

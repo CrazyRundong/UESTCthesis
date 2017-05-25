@@ -7,25 +7,38 @@ basic convolutional neural networks and its optimize methods.
 
 In this and following chapters, notations are defined as table \ref{tab::Notaion}.
 
-\begin{table}[htb]
-    \centering
-    \begin{tabular}{c | l}
-        \toprule
-        Notation & Meaning \\
-        \midrule
-        $x \: \textrm{or} \: X$ & a scalar \\
-        $\mathbf{x}$ & a column vector \\
-        $\mathbf{X}$ & a matrix \\
-        $\mathcal{X}$ & a dataset \\
-        $\mathbf{x}_i$ & $i_{th}$ column of matrix $\mathbf{X}$ \\
-        $x_{ij}$ & $j_{th}$ element of $i_{th}$ column in matrix $\mathbf{X}$ \\ 
-        $x_j$ & $j_{th}$ element of column vector $\mathbf{x}$ \\
-        $\left\|\cdot\right\|$ & 2-norm operator \\
-        \bottomrule
-    \end{tabular}
-    \caption{Notions in this work}
-    \label{tab::Notaion}
-\end{table}
+\threelinetable[htb]{tab::Notaion}{0.55\textwidth}{c|l}{Notions in this work}
+{Notation & Meaning \\}
+{
+    $x \: \textrm{or} \: X$ & a scalar \\
+    $\mathbf{x}$ & a column vector \\
+    $\mathbf{X}$ & a matrix \\
+    $\mathcal{X}$ & a dataset \\
+    $\mathbf{x}_i$ & $i_{th}$ column of matrix $\mathbf{X}$ \\
+    $x_{ij}$ & $j_{th}$ element of $i_{th}$ column in matrix $\mathbf{X}$ \\ 
+    $x_j$ & $j_{th}$ element of column vector $\mathbf{x}$ \\
+    $\left\|\cdot\right\|$ & 2-norm operator \\
+} {}
+
+%\begin{table}[htb]
+%    \centering
+%    \caption{Notions in this work}
+%    \label{tab::Notaion}
+%    \begin{tabular}{c | l}
+%        \toprule
+%        Notation & Meaning \\
+%        \midrule
+%        $x \: \textrm{or} \: X$ & a scalar \\
+%        $\mathbf{x}$ & a column vector \\
+%        $\mathbf{X}$ & a matrix \\
+%        $\mathcal{X}$ & a dataset \\
+%        $\mathbf{x}_i$ & $i_{th}$ column of matrix $\mathbf{X}$ \\
+%        $x_{ij}$ & $j_{th}$ element of $i_{th}$ column in matrix $\mathbf{X}$ \\ 
+%        $x_j$ & $j_{th}$ element of column vector $\mathbf{x}$ \\
+%        $\left\|\cdot\right\|$ & 2-norm operator \\
+%        \bottomrule
+%    \end{tabular}
+%\end{table}
 
 \section{Three Dimensional Integrated Circuits} \label{sec::3DIC}
 As integrated circuits technology continuously improves its integration capabilities,
@@ -160,7 +173,7 @@ Neurons in a same layer don't connect to each other, but fully connect to its co
 in adjacent layers(so the network called fully-connected ANN). 
 The first layer which accepts input data $x_{1\cdots n}^{(j)}$ is called input layer.
 Correspondingly, the last layer which outputs one or more values $y^{(j)}$ is called output layer.
-Other middle layers are called ``hidden layer(\textit{s})''.
+Other middle layers are called ``hidden layers''.
 If one network has no neuron connections from latter layers to preceding layers,
 we call this network a \textit{feedforward network}.
 

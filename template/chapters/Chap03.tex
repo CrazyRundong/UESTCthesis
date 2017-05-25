@@ -21,7 +21,7 @@ that could be used in runtime scenario.
 \cite{Zhang2016Fast} proposed a two-layers fully connected ANN model with hand-crafted
 feature extraction, then train this model by large amount of $(T \to F_{\left\{x,y,x\right\}})$ data
 generated off-line by FEM based model. 
-The ANN model achieved accuracy of RMSE(Rooted Mean Square Error) $0.0779$
+The ANN model achieved accuracy of RMSE (Rooted Mean Square Error) $0.0779$
 in the normed test set, and fast enough 
 ($300 TSVs / 0.06s$ @ 2.4 GHz, 1 core) to be applied
 in runtime scenario due to simplicity of the ANN model they used.
@@ -49,24 +49,39 @@ The format of their data is like table \ref{tab::t-sformat}
 Note that the coordinate of $z$ is always $0$, because the dies in 3D IC are
 extremely thin.
 
-\begin{table}[htb]
-\centering
-\begin{tabularx}{30em}{*{3}{>{\centering\arraybackslash}X} *{2}{|c}}
-    \toprule
+\threelinetable[htb]{tab::t-sformat}{0.8\textwidth}{*{3}{>{\centering\arraybackslash}X} *{2}{|c}}
+{Format of Temperature-Stress Dataset}
+{
     \multicolumn{3}{c|}{Coordinate($m$)} & 
     \multirow{2}{*}{Temperature($K$)} & 
     \multirow{2}{*}{Stress($N/m^2$)} \\
     \cmidrule{1-3}
     x & y & z && \\
-    \midrule
+}
+{
     8.4631E-5 & 9.5289E-5 & 0 & 359.1351 & 31150.4105 \\
     2.0725E-4 & 1.2576E-4 & 0 & 359.0865 & 58634.6722 \\
     9.5824E-5 & 2.0547E-4 & 0 & 359.0865 & 62021.0153 \\
-    \bottomrule
-\end{tabularx}
-\caption{Format of Temperature-Stress Dataset}
-\label{tab::t-sformat}
-\end{table} 
+} {}
+
+%\begin{table}[htb]
+%\centering
+%\caption{Format of Temperature-Stress Dataset}
+%\label{tab::t-sformat}
+%\begin{tabularx}{30em}{*{3}{>{\centering\arraybackslash}X} *{2}{|c}}
+%    \toprule
+%    \multicolumn{3}{c|}{Coordinate($m$)} & 
+%    \multirow{2}{*}{Temperature($K$)} & 
+%    \multirow{2}{*}{Stress($N/m^2$)} \\
+%    \cmidrule{1-3}
+%    x & y & z && \\
+%    \midrule
+%    8.4631E-5 & 9.5289E-5 & 0 & 359.1351 & 31150.4105 \\
+%    2.0725E-4 & 1.2576E-4 & 0 & 359.0865 & 58634.6722 \\
+%    9.5824E-5 & 2.0547E-4 & 0 & 359.0865 & 62021.0153 \\
+%    \bottomrule
+%\end{tabularx}
+%\end{table} 
 
 \subsection{Hand-Crafted Feature Extraction} \label{sec::hc-fe}
 Based on these observations:
@@ -99,7 +114,7 @@ The ANN model used in this method uses a simple two layers structure.
 The input layer gets $55$ neurons, and hidden layer $15$ neurons, finally a $1$ neuron layer
 to output the approximated maximum stress value.
 Training with $2400$ samples randomly selected from whole temperature-stress dataset,
-the model achieves the accuracy of RMSE(Rooted Mean Square Error) $0.0779$ in the $300$ samples test set,
+the model achieves the accuracy of RMSE (Rooted Mean Square Error) $0.0779$ in the $300$ samples test set,
 which is also randomly selected with no recurrence to training set, after $1000$ iterations.
 
 \section{Automatic Feature Extraction via CNN}
@@ -187,7 +202,7 @@ The samples in them are formatted as $\left(\mathbf{T}^*, y^*\right)^{(i)}_{i=1,
 where temperature map $\mathbf{T}^*$ are $28 \times 28$ matrix, and normed max stress $y ^ *$ are scalars.
 These form ideal ``x-y'' maps to train neural networks.
 
-\subsection{A LeNet Based Model}
+\subsection{A LeNet Based Model} \label{sec::lenet}
 LeNet is a very early CNN structure for handwriting recognition \cite{lecun1998gradient}. Since the temperature map
 $\mathbf{T}^*$ in $\mathcal{D}_{\textrm{train}}^*$ and $\mathcal{D}_{\textrm{test}}^*$ get the same size to MINST dataset,
 LeNet becomes the very first choice to perform feature extraction. 
@@ -199,6 +214,8 @@ digit $i$. Usually this output follows a \textit{maxout} layer to output that $i
 The structure of LeNet is demonstrated in table \ref{tab::LeNet}.
 \begin{table}[htb]
     \centering
+    \caption{Structure of Original LeNet (top to down)}
+    \label{tab::LeNet}
     \begin{tabular}{cll}
         \toprule
         Layer ID & Layer Type & Configuration \\
@@ -216,8 +233,6 @@ The structure of LeNet is demonstrated in table \ref{tab::LeNet}.
         maxout & Maxout     & \\
         \bottomrule
     \end{tabular}
-    \caption{Structure of Original LeNet (top to down)}
-    \label{tab::LeNet}
 \end{table}
 Note that in table \ref{tab::LeNet}, the meanings of ``Configuration'' of each layer types are:
 \begin{description}[labelsep=0.5em]
@@ -252,6 +267,8 @@ we modified the original LeNet as following:
 After all, our LeNet based model for 3D IC runtime reliability analysis job is structured as table \ref{tab::LeNet'}.
 \begin{table}[htb]
     \centering
+    \caption{Structure of Modified LeNet (top to down)}
+    \label{tab::LeNet'}
     \begin{tabular}{cll}
         \toprule
         Layer ID & Layer Type & Configuration \\
@@ -268,27 +285,27 @@ After all, our LeNet based model for 3D IC runtime reliability analysis job is s
         fc2   & Fully-Connected & $1$ \\
         \bottomrule
     \end{tabular}
-    \caption{Structure of Modified LeNet (top to down)}
-    \label{tab::LeNet'}
 \end{table}
 In our experiment \ref{sec::exper}, this model outperforms the fully-connected ANN model in \cite{Zhang2016Fast}
 with great advantage.
 
-\subsection{A Tiny VGG-Net Based Model}
+\subsection{A Tiny VGG-Net Based Model} \label{sec::vggnet}
 VGG-Net is a very deep CNN architecture proposed by Visual Geometry Group (VGG) of Oxford \cite{simonyan2014very}.
 Its original purpose is to solve the ImageNet Large-ScaleVisual Recognition Challenge
 (ILSVRC-2014) image classification task \cite{russakovsky2015imagenet}.
 Equipped with very small convolution kernels ($3 \times 3$), the VGG-Net could exploit from very deep
 stacked convolution layers.
 
-VGG-Net has several variants, with depth from 11 weight layers (8 conv. and 3 FC layers) 
-to 19 weight layers in the network (16 conv. and 3 FC layers). For the input size of $\mathcal{D}^*$
+VGG-Net has several variants, with depth from 11 weight layers (8 convolution and 3 FC layers) 
+to 19 weight layers in the network (16 convolution and 3 FC layers). For the input size of $\mathcal{D}^*$
 is much smaller to VGG-Net's input size ($28 \times 28$ vs. $224 \times 224$),
 we select the smallest variant as our inception to make sure data samples in $\mathcal{D}^*$ could ``feed'' the net.
 Structure of this variant is demonstrated in table \ref{tab::VGG-Net}.
 
 \begin{table}[htb]
     \centering
+    \caption{Structure of shallow VGG-Net (top to down)}
+    \label{tab::VGG-Net}
     \begin{tabular}{cll}
         \toprule
         Layer ID & Layer Type & Configuration \\
@@ -312,14 +329,14 @@ Structure of this variant is demonstrated in table \ref{tab::VGG-Net}.
         sf    & Soft-Max      & \\
         \bottomrule
     \end{tabular}
-    \caption{Structure of shallow VGG-Net}
-    \label{tab::VGG-Net}
 \end{table}
 
 Note that we omit the activation layers in \ref{tab::VGG-Net} for conciseness. 
 Precisely each ``Convolution'' layer is a convolution unit structured as \ref{tab::VGG-CU}.
 \begin{table}[htb]
     \centering
+    \caption{Convolution unit in \ref{tab::VGG-Net}}
+    \label{tab::VGG-CU}
     \begin{tabular}{cll}
         \toprule
         Layer ID & Layer Type & Configuration \\
@@ -328,8 +345,6 @@ Precisely each ``Convolution'' layer is a convolution unit structured as \ref{ta
         relu\textit{i} & Activation  & ReLU \\
         \bottomrule
     \end{tabular}
-    \caption{Convolution unit in \ref{tab::VGG-Net}}
-    \label{tab::VGG-CU}
 \end{table}
 The activation layers in these convolution units are equipped with Rectified Linear Units (ReLU)
 activation function, formally $g(x) = \max (0, x)$. 
@@ -340,14 +355,283 @@ The gradients are not only large but also consistent. The second derivative of t
 and the derivative of the rectifying operation is $1$ everywhere that the unit is active. 
 This means that the gradient direction is far more useful for learning than it would be with activation functions
 that introduce second-order effects.
+
+One high light of VGG-Net is the small convolution kernel ($3\times3$) it used.
+It is easy to see that a stack of two
+$3\times3$ convolution layers (without spatial pooling in between) has an effective receptive field of $5\times5$;
+Three such layers have a $7\times7$ effective receptive field.
+So what have we gained by using, for instance, a
+stack of three $3\times3$ convolution layers instead of a single $7\times7$ layer? 
+First, we incorporate three non-linear
+rectification layers instead of a single one, which makes the decision function more discriminative.
+Second, we decrease the number of parameters: assuming that both the input and the output of a
+three-layer $3\times3$ convolution stack has $C$ channels, the stack is parametrised by $3\times 3^2 \times C^2=27 \times C^2$
+weights; at the same time, a single $7\times7$ convolution layer would require $7^2 \times C^2 = 49 \times C^2$ parameters, i.e.
+$81\%$ more. This can be seen as imposing a regularization on the $7\times7$ convolution filters, forcing them to
+have a decomposition through the $3\times3$ filters (with non-linearity injected in between).
     
 The images in ILSVRC-2014 are classified into $1000$ classes (human, dogs, cars, etc.),
 so the fc3 layer in VGG-Net gets $1000$ hidden neurons to output the probability of input being
 such class.
 To correctly output the desired maximum stress approximation,
-we replace all fully-connected layers in this structure to flat and bellow layers in configuration
+we replace all fully-connected layers in this structure to flat and bellow layers in table
 \ref{tab::LeNet'}.
 
-\section{CNN-Stress: an End-to-End Process}
+One important improvement of our model to original VGG-Net is that we inset a batch normalization \cite{ioffe2015batch}
+layer between Convolution layer and Activation layer in \ref{tab::VGG-CU}.
+Consider a neural network with only one weighted neuron in each layer, with a input $x$, its output
+$\hat{y} = \omega_1 \cdot \omega_2 \cdot \cdots \omega_n \cdot x$.
+To learn from a gradient $\mathbf{g} = \nabla_{\boldsymbol{\omega}}\hat{y}$, we update the network weights by
+$\boldsymbol{\omega} \gets \boldsymbol{\omega}  + \epsilon \mathbf{g}$. 
+This introduces high order items to the network, since $\hat{y}$ is updated as
+\begin{equation*}
+x \left(\omega_1 - \epsilon g_1\right) \left(\omega_2 - \epsilon g_2\right) 
+\cdots \left(\omega_l - \epsilon g_l\right)
+\end{equation*}
+This introduces $l$ orders item to the weights, such as $2$ order item 
+$\epsilon^2 g_1 g_2 \prod_{i=3}^{l} \omega_i$.
+If $\prod_{i=3}^{l} \omega_i$ is large, the current layer parameter updating will
+strongly depends on other layers, which limits the learning rate $\epsilon$ and
+make the training procedure very slow.
+
+Batch normalization provides an elegant way of reparametrizing almost any deep
+network. The reparametrization significantly reduces the problem of coordinating
+updates across many layers. Batch normalization can be applied to any input
+or hidden layer in a network. Let $\mathbf{H}$ be a minibatch of activations of the layer
+to normalize, arranged as a design matrix, with the activations for each example
+appearing in a row of the matrix. To normalize $\mathbf{H}$, we replace it with
+\[
+\mathbf{H'}=\frac{\mathbf{H}-\boldsymbol{\mu}}{\boldsymbol{\sigma}}
+\]
+where $\boldsymbol{\mu}$ is a vector containing the mean of each unit and $ \boldsymbol{\sigma}$ is a vector containing
+the standard deviation of each unit. The arithmetic here is based on broadcasting
+the vector $\boldsymbol{\mu}$ and the vector $\boldsymbol{\sigma}$ 
+to be applied to every row of the matrix $\mathbf{H}$.
+Within each row, the arithmetic is element-wise, so $H_{i,j}$ is normalized by subtracting $\mu_j$ 
+and dividing by $\sigma_j$.The rest of the network then operates on $\mathbf{H'}$ in exactly the
+same way that the original network operated on $\mathbf{H}$.
+
+At training time,
+\begin{equation}
+\boldsymbol{\mu} = \frac{1}{m}\sum_i \mathbf{H}_{i,:}
+\end{equation}
+and
+\begin{equation}
+\boldsymbol{\sigma} = \sqrt{\delta + \frac{1}{m} \sum_i \left(\mathbf{H} - \boldsymbol{\mu}\right)^2_i}
+\end{equation}
+where $\delta$ is a small positive value such as $10^{-8}$ imposed to avoid encountering
+the undefined gradient of $\sqrt{z}$ at $z = 0$. Crucially, \textit{we back-propagate through
+these operations} for computing the mean and the standard deviation, and for
+applying them to normalize $\mathbf{H}$. This means that the gradient will never propose
+an operation that acts simply to increase the standard deviation or mean of
+$h_i$; the normalization operations remove the effect of such an action and zero
+out its component in the gradient. This was a major innovation of the batch
+normalization approach. Previous approaches had involved adding penalties to
+the cost function to encourage units to have normalized activation statistics or
+involved intervening to renormalize unit statistics after each gradient descent step.
+The former approach usually resulted in imperfect normalization and the latter
+usually resulted in significant wasted time as the learning algorithm repeatedly
+proposed changing the mean and variance and the normalization step repeatedly
+undid this change. Batch normalization reparametrizes the model to make some
+units always be standardized by definition, deftly sidestepping both problems.
+
+Another improvement is we use Leaky ReLU activation function to replace the
+original ReLU activations.
+Since ReLU always outputs $0$ when its inputs small than $0$,
+it could be hard to optimize the neuron weights when 
+$\boldsymbol{\omega}^{\textrm{T}} \cdot \mathbf{x} \le 0$,
+since the gradient is always $0$ in this scenario.
+Leaky ReLU maintains a small gradient $a$ when input small than $0$.
+This slightly improves result accuracy. Formally
+\begin{equation}
+\textrm{Leaky ReLU}(x)= \left\{
+    \begin{array}{rl}
+    x ,& \textrm{if} \; x > 0 \\
+    ax ,& \textrm{otherwise} \\
+    \end{array}
+\right.
+\end{equation}
+
+Combining all above improvements, our model based on VGG-Net is demonstrated in table \ref{tab::VGG_}.
+\begin{table}
+    \centering
+    \caption{Structure of Modified VGG-Net (top to down)}
+    \label{tab::VGG_}
+    \begin{tabular}{cll}
+        \toprule
+        Layer ID & Layer Type & Configuration \\
+        \midrule
+        conv1 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $20$ \\
+        conv2 & Convolution & $\left(1\times1\right)$, $\left(0\times0\right)$, $40$ \\
+        conv3 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $20$ \\
+        pool1 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv4 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $40$ \\
+        conv5 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $40$ \\
+        pool2 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv6 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $80$ \\
+        conv7 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $80$ \\
+        pool3 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        conv6 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $160$ \\
+        conv7 & Convolution & $\left(3\times3\right)$, $\left(1\times1\right)$, $160$ \\
+        pool4 & Pooling       & Max, $\left(2\times2\right)$, $2$ \\
+        flat  & Flatten     & \\
+        fc1   & Fully-Connected & $50$ \\
+        tanh3  & Activation  & Tanh \\
+        fc2   & Fully-Connected & $1$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htb]
+    \centering
+    \caption{Convolution unit in \ref{tab::VGG_}}
+    \label{tab::VGG-CU_}
+    \begin{tabular}{cll}
+        \toprule
+        Layer ID & Layer Type & Configuration \\
+        \midrule
+        conv\textit{i} & Convolution & \textit{conv config} \\
+        bn\textit{i}   & Batch Normalization & $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ are mutable \\
+        relu\textit{i} & Activation  & Leaky ReLU \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Note that we introduce new parameters to Convolutional layers' parameters:
+the items in ``Configurations'' mean Convolution kernel size, padding size, number of channels, respectively.
+And the convolution unit in this structure is changed into table \ref{tab::VGG-CU_}.
+
+The incorporation of $1 \times 1$ convolution layers (conv2 in table \ref{tab::VGG_}) is a way to increase the nonlinearity
+of the decision function without affecting the receptive fields of the convolution layers. Even
+though in our case the $1 \times 1$ convolution is essentially a linear projection onto the space of the same
+dimensionality (the number of input and output channels is the same), an additional non-linearity is
+introduced by the rectification function. It should be noted that $1 \times 1$ convolution layers have recently been
+utilized in the ``Network in Network'' architecture of \cite{lin2013network}.
+And each time the data pass though a pooling layer, we double the number of output channels.
+Because the pooling layer with $2 \times 2$ kernel size and $2 \times 2$ step size will halve the
+output size at each axis, double the channel number could prevent information bottleneck.
+
+% \section{CNN-Stress: an End-to-End Process}
 
 \section{Experiments} \label{sec::exper}
+In this section, we report the performance of our proposed LeNet and VGG-Net based models in \ref{sec::lenet} and \ref{sec::vggnet},
+respectively. As a comparison, we also cite the result of the fully-connected ANN model in \cite{Zhang2016Fast}.
+We use the dataset preprocessed in \ref{sec::FEM-data} to train and evaluate our models.
+The evaluation function is the RMSE to the normed output $\mathbf{y} \in \mathbb{R}^n$ and ground truth $\mathbf{\hat{y}} \in \mathbb{R}^n$,
+formally \footnote{$\star$ is the element wise production operator to vectors}:
+\[ \textrm{RMSE} \; (\mathbf{y}, \mathbf{\hat{y}}) = 
+\sqrt{\frac{\left\| \mathbf{y} \star \mathbf{\hat{y}} \right\|}{n}} \]
+The train and test procedure is implemented by MXNet framework \cite{chen2015mxnet}, which is a
+very efficient open source deep learning toolbox.
+All bellow experiments are performed on a windows laptop equipping with a NVIDAI GTX960M GPU.
+MXNet runs in single GPU mode, with NVIDIA \texttt{cudnn-5.5} acceleration library loaded.
+
+\subsection{Hyper Parameters for Training} \label{sec::hp}
+Good hyper parameters are critical in training a superior network.
+Tuning such parameters is part of the dark magic in machine learning. 
+After numbers of experiments, the most optimal hyper parameters we have get for present are list in table \ref{tab::hp}.
+
+\threelinetable[htb]{tab::hp}{0.5\textwidth}{>{\centering\arraybackslash}X *{2}{c}}
+{Hyper Prameters for Training}
+{
+    \multirow{2}{*}{Parameter (Notation)} & \multicolumn{2}{c}{Model} \\
+    \cmidrule{2-3}
+    & LeNet & VGG-Net \\
+}
+{
+    Base Learning Rate ($\epsilon_0$) & $0.1$ & $0.03$ \\ 
+    $\epsilon$ Rescan Epoch ($n_\epsilon$) & $250$ & $250$ \\
+    $\epsilon$ Rescan Factor ($r_\epsilon$) & $0.9$ & $0.9$ \\
+    Momentum $v$ & $ 0.9 $ & $0.9$ \\
+    Batch Size ($n_b$) & $ 10 $ & $256$ \\
+    Training Epoch ($N_{\textrm{train}}$) & $ 10 $ & $ 100 $ \\
+} {}
+
+Note the first three parameters $\epsilon_0$, $n_\epsilon$ and $r_\epsilon$ in table \ref{tab::hp}.
+We use a strategy to scaling the learning rate $\epsilon$ on the fly, because the optimizing space
+near the local or global minimum is quite flatten, the optimize algorithm may miss the minimum
+with a large $\epsilon$. The strategy is demonstrated in algorithm \ref{alg::frac}.
+
+\begin{algorithm}
+    \caption{Learning Rate Factor}
+    \label{alg::frac}
+    \begin{algorithmic}
+        \Require current epoch $n$, learning rate $\epsilon$
+        \Require hyper parameters: $\epsilon_0$, $n_\epsilon$, $r_\epsilon$ and $N_{\textrm{train}}$
+        \State $\epsilon \gets \epsilon_0$
+        \While{$n < N_{\textrm{train}}$}
+        \State $n \gets n + 1$
+        \If{$n \mod n_\epsilon = 0$}
+        \State $\epsilon \gets \epsilon \times r_\epsilon$
+        \EndIf
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection{Training Procedure}
+Using the hyper parameters in section \ref{sec::hp}, we train the models with $\mathcal{D}_{\textrm{train}}^*$
+by stochastic gradient descent optimizer. The training for LeNet based model is extremely fast, it only
+takes $\mathbf{6.72}$ seconds to convergence. The VGG-Net based model takes $\mathbf{72.11}$ seconds to convergence.
+Because this model is much deeper than LeNet based model, which will spend more time on back propagation.
+
+\begin{pics}[htb]{Learning Error Curves: }{pic::curve}
+    \addsubpic{LeNet Based Model}{width=0.5\textwidth}{lenet_curve.eps}
+    \addsubpic{VGG-Net Based Model}{width=0.5\textwidth}{VGG_curve.eps}
+\end{pics}
+
+The learning error curves (training RMSE vs. epoch number) of these two models are illustrated in figure \ref{lenet_curve.eps} and \ref{VGG_curve.eps}.
+The red line is training error, while blue line the evaluation error.
+Although the hyper parameter $N_{\textrm{train}}$ of LeNet based model is set to be $100$, its training
+procedure converges quickly after $15$ epochs as figure \ref{VGG_curve.eps}.
+Another interesting observation is, the training error of LeNet based model drops suddenly after $5$ training
+epochs.
+
+Some other useful informations about the training procedure and trained model are listed in table \ref{tab::Modelinfo}. It's quite surprising that with a much deeper structure, VGG-Net based model
+still get less parameters to LeNet.
+This is an obvious illustration of the parameter-saving property discussed in section \ref{sec::vggnet}.
+
+\threelinetable[htb]{tab::Modelinfo}{0.55\textwidth}{>{\centering\arraybackslash}X *{2}{c}}
+{Other Informations about Training}
+{
+    \multirow{2}{*}{Information} & \multicolumn{2}{c}{Model} \\
+    \cmidrule{2-3}
+    & LeNet & VGG-Net \\
+}
+{
+    Model Size (kB) & 179 & 1851 \\
+}{}
+
+\subsection{Prediction Performance}
+Since these models are well trained, we apply them to $\mathcal{D}_{\textrm{test}}^*$ to evaluate their performance.
+Our interests are focused on accuracy and speed of these models.
+The accuracy performances of LeNet based model and VGG-Net based model are illustrated in
+figure \ref{lenet_val.eps} and \ref{VGG_val.eps}.
+We use our trained model to predict all of the samples in $\mathcal{D}_{\textrm{test}}^*$, and randomly
+select $25$ outputs for plotting.
+The green dots in figure are ground truth $\hat{y}^* \times y_{max}$ in $\mathcal{D}_{\textrm{test}}^*$, and red cross
+the net predictions $\textrm{Net}\left( \mathbf{T}^* \right) \times y_{max}$.
+Except few samples, our model could approximate the temperature distribution to thermal stress well.
+
+\begin{pics}[htb]{Prediction Performance: }{pic::pred}
+    \addsubpic{LeNet Based Model}{width=0.8\textwidth}{lenet_val.eps}
+    \addsubpic{VGG-Net Based Model}{width=0.8\textwidth}{VGG_val.eps}
+\end{pics}
+
+The quantitated result about RMSE and prediction speed are demonstrated in table \ref{tab::Prediction}.
+We also add the result of fully-connected ANN (fcANN) model in \cite{Zhang2016Fast} as baseline.
+Both of our models outperform their baseline with great advantage.
+Note the speed of fcANN model is evaluated in 1 thread CPU @ 2.4 GHz, while our models
+are running at a GPU (although it's quite weak) with acceleration library loaded.
+
+
+\threelinetable[htb]{tab::Prediction}{0.7\textwidth}{>{\centering\arraybackslash}X *{3}{c}}
+{Prediction Performance}
+{
+    \multirow{2}{*}{Information} & \multicolumn{3}{c}{Model} \\
+    \cmidrule{2-4}
+    & LeNet & VGG-Net & fcANN \\
+}
+{
+    RMSE on $\mathcal{D}_{\textrm{test}}^*$ & $0.0256$ & $0.0273$ & $0.0779$ \\
+    Prediction Speed (samples/s) & $14955.13$ & $257286.43$ & $5000$ \\
+}{}
