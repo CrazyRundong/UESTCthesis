@@ -1,11 +1,11 @@
 % !Mode:: "TeX:UTF-8"
 
 
-\chapter{Preliminaries}
+\chapter{Preliminaries} \label{chap::pre}
 In this chapter, we introduce the conceptions of three dimensional integrated circuits, its thermal behavior, 
 basic convolutional neural networks and its optimize methods.
 
-In this and following chapters, notations are defined as table \ref{tab::Notaion}.
+In this and following chapters, notations are defined in table \ref{tab::Notaion}.
 
 \threelinetable[htb]{tab::Notaion}{0.55\textwidth}{c|l}{Notions in this work}
 {Notation & Meaning \\}
@@ -191,6 +191,37 @@ The procedure of transforming raw data into well formated and normed inputs $\ma
 \textit{feature extraction} or \textit{feature engineering}.
 
 \section{Convolutional Neural Networks} \label{sec::intro_cnn}
-As described in \cite{Goodfellow2016Deep}, 
+As described in \cite{Goodfellow2016Deep, lecun2015deep, Zhou2016ML}, convolutional neuron networks (CNNs) are
+a special neuron networks which are good at dealing with networking-structured data, such as timing series.
+CNNs are also good at extracting small local features, such as the shape of eye in series of human pictures,
+or a boxed car in a video stream.
+Since CNNs are widely used in jobs like object detection/tracking, neutral language processing, etc.
+CNN structure is defined as: a network with at least one layer equipped with convolution operations.
 
-\section{Optimize Methods for Neural Networks}
+The convolution here is very different from signal convolution, it much more like matrix \textit{masking}
+operations.
+Consider an input $\mathbf{X} \in \mathbb{R}^2$ with size of $m \times m$, we want to extract a small feature
+$\mathbf{Y} \in \mathbb{R}^2$ with size of $n \times n$, where $n \le m$. Since the output of current layer
+will connect to following activation, we give a intuitively idea:
+if this layer successfully learned the feature $\mathbf{Y}$,
+following layer will be activated.
+
+Leaving away the learning procedure, if the feature appears in $\mathbf{X}$ at the location of $(i,j)$ (top-left point),
+the output of ``feature extractor'' $\mathbf{Y}$ at this location is the sum of all elements in \eqref{eq::conv},
+\begin{equation} \label{eq::conv}
+    \begin{bmatrix}
+    x_{i,j} & \cdots & x_{i+n,j} \\
+    \vdots  &        & \vdots    \\
+    x_{i,j+n} & \cdots & x_{i+n,j+n} \\
+    \end{bmatrix}
+    \star \mathbf{Y}
+\end{equation}
+where $\star$ is the element wise production. With different ``stride'', $\mathbf{Y}$ jumps to different
+locations in $\mathbf{X}$, trying to extract its feature in that location.
+
+The ``feature extractor'' $\mathbf{Y}$ is called \textit{convolution kernel}.
+A convolution kernel traverse its input with a user-defied stride, so this feature in whole $\mathbf{X}$
+shares the parameters in $\mathbf{Y}$.
+One convolution layer could have more than one convolution kernel, the number of kernels is called \textit{channel}.
+
+%\section{Optimize Methods for Neural Networks}

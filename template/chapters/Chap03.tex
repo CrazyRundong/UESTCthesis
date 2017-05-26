@@ -1,6 +1,6 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter{Deep Learning Based Model for Runtime Analysis}
+\chapter{Deep Learning Based Model for Runtime Analysis} \label{chap::Model}
 In this chapter we describe our proposed deep learning based method for 3D IC runtime analysis.
 First, we briefly review the work of \cite{Zhang2016Fast}, for their model
 will be partially used in our work.
@@ -36,7 +36,8 @@ The size of whole chip is $1cm\times1cm\times300\mu m$, and it is
 divided into $4\times4$ same sized blocks to represent $16$ cores,
 both of the two layers are $1cm\times1cm\times100\mu m$. 
 For the TSV structure, they set the values of $r_i$ and $r_o$
-% TODO: demostrate $r_i$ and $r_o$
+\footnote{$r_i$ is the radius from TSV center to its metal edge,
+$r_o$ the radius from TSV center to its oxide edge}
 as $20\mu m$ and $24\mu m$, respectively. They also couple
 the solid heat conduction field and the solid mechanical field.
 
@@ -602,7 +603,7 @@ This is an obvious illustration of the parameter-saving property discussed in se
 }{}
 
 \subsection{Prediction Performance}
-Since these models are well trained, we apply them to $\mathcal{D}_{\textrm{test}}^*$ to evaluate their performance.
+Once these models are well trained, we could apply them to $\mathcal{D}_{\textrm{test}}^*$ to evaluate their performance.
 Our interests are focused on accuracy and speed of these models.
 The accuracy performances of LeNet based model and VGG-Net based model are illustrated in
 figure \ref{lenet_val.eps} and \ref{VGG_val.eps}.
@@ -612,17 +613,14 @@ The green dots in figure are ground truth $\hat{y}^* \times y_{max}$ in $\mathca
 the net predictions $\textrm{Net}\left( \mathbf{T}^* \right) \times y_{max}$.
 Except few samples, our model could approximate the temperature distribution to thermal stress well.
 
-\begin{pics}[htb]{Prediction Performance: }{pic::pred}
+\begin{pics}[p]{Prediction Performance: }{pic::pred}
     \addsubpic{LeNet Based Model}{width=0.8\textwidth}{lenet_val.eps}
     \addsubpic{VGG-Net Based Model}{width=0.8\textwidth}{VGG_val.eps}
 \end{pics}
 
-The quantitated result about RMSE and prediction speed are demonstrated in table \ref{tab::Prediction}.
-We also add the result of fully-connected ANN (fcANN) model in \cite{Zhang2016Fast} as baseline.
-Both of our models outperform their baseline with great advantage.
-Note the speed of fcANN model is evaluated in 1 thread CPU @ 2.4 GHz, while our models
-are running at a GPU (although it's quite weak) with acceleration library loaded.
-
+The quantitative results about model prediction error and speed are demonstrated in table \ref{tab::Prediction}.
+We also add the result of fully-connected ANN (fcANN) model in \cite{Zhang2016Fast} as a baseline.
+Obviously both of our models outperform this baseline with great advantage.
 
 \threelinetable[htb]{tab::Prediction}{0.7\textwidth}{>{\centering\arraybackslash}X *{3}{c}}
 {Prediction Performance}
@@ -632,6 +630,15 @@ are running at a GPU (although it's quite weak) with acceleration library loaded
     & LeNet & VGG-Net & fcANN \\
 }
 {
-    RMSE on $\mathcal{D}_{\textrm{test}}^*$ & $0.0256$ & $0.0273$ & $0.0779$ \\
-    Prediction Speed (samples/s) & $14955.13$ & $257286.43$ & $5000$ \\
+    RMSE on $\mathcal{D}_{\textrm{test}}^*$ & $\mathbf{0.0256}$ & $0.0273$ & $0.0779$ \\
+    Prediction Speed (samples/s) & $14955.13$ & $\mathbf{257286.43}$ & $5000$ \\
 }{}
+
+Since our prime purpose is developing a fast approximation used in runtime analysis,
+computing costs become another concern.
+Benefiting from small convolution kernels, our model based on VGG-Net archives dramatically high speed of $257286.43$ samples/s.
+Because the time complexity of convolution is in the order of $O \left(n^2\right)$, small kernel
+could introduce quadratic speed improvement.
+Note the speed of fcANN model is evaluated in 1 thread CPU @ 2.4 GHz, while other two models
+are evaluated at a GPU (although it's quite weak) platform with acceleration library loaded.
+Even so, the models' speed performance could meet the change of runtime analysis well.
